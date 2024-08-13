@@ -1,0 +1,15 @@
+Made by Vila
+
+To deploy run in order:
+
+docker login
+docker tag flask-app-image:latest tvilarim/flask-app-image:latest
+docker build -t tvilarim/flask-app-image:latest .
+docker push tvilarim/flask-app-image:latest
+
+kubectl apply -f flask-app-deployment.yaml
+kubectl apply -f flask-app-service.yaml
+
+minikube service flask-app-service
+
+

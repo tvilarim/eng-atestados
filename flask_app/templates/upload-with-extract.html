@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Upload PDF</title>
+  
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+  
+  <!-- Custom CSS for Highlighting -->
+  <style>
+    mark {
+      background-color: yellow;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upload PDF</h1>
+  <form method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit" value="Upload">
+  </form>
+  
+  <h2>Extracted Text</h2>
+  <input type="text" id="searchBox" placeholder="Search...">
+  
+  <table id="example" class="display" style="width:100%">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Text</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+  
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+  
+  <!-- mark.js Library -->
+  <script src="https://cdn.jsdelivr.net/mark.js/8.11.1/jquery.mark.min.js"></script>
+  
+  <!-- DataTables mark.js Integration -->
+  <script src="https://cdn.datatables.net/plug-ins/1.10.19/features/mark.js/datatables.mark.js"></script>
+  
+  <script>
+    $(document).ready(function() {
+      const table = $('#example').DataTable({
+        ajax: {
+          url: '/data',
+          dataSrc: ''
+        },
+        columns: [
+          { data: 'id' },
+          { data: 'text' }
+        ],
+        mark: true // Enable highlighting
+      });
+
+      $('#searchBox').on('keyup', function() {
+        table.search(this.value).draw();
+      });
+    });
+  </script>
+</body>
+</html>

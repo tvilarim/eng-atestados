@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-config
+  namespace: default
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS pdf_strings (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      content TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS decimal_data (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      value DECIMAL(10, 2) NOT NULL
+    );
