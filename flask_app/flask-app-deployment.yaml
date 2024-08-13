@@ -12,7 +12,7 @@ spec:
     metadata:
       labels:
         app: flask-app
-        version: "v2.4.10" #With extraced text and search bar
+        version: "v2.4.13" #Testing git2
     spec:
       containers:
       - name: flask-app
