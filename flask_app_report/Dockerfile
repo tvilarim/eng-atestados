@@ -1,9 +1,9 @@
 # Use the official Python image from the Docker Hub
 FROM python:3.9-slim
 
-# Install poppler-utils for PDF processing
+# Install system dependencies including poppler-utils and tesseract
 RUN apt-get update && \
-    apt-get install -y poppler-utils && \
+    apt-get install -y poppler-utils tesseract-ocr && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
