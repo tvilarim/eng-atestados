@@ -10,7 +10,7 @@ import hashlib
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/app/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'mysql-secret')  # Securely get the secret key
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'your_default_secret_key')  # Securely get the secret key
 
 # Ensure the upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

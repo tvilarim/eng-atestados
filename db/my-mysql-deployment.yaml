@@ -19,9 +19,15 @@ spec:
         image: mysql:8.0
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: khg45hj48Fmg
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
         - name: MYSQL_DATABASE
-          value: atestados
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-database
         ports:
         - containerPort: 3306
         volumeMounts:
