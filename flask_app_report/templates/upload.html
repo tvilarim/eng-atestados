@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+</head>
+<body>
+    <h1>Upload PDF</h1>
+    <form action="/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".pdf">
+        <input type="submit" value="Upload">
+    </form>
+
+    <h1>Search Reports</h1>
+    <form action="/search" method="get">
+        <label for="start_date">Start Date (dd/mm/yyyy):</label>
+        <input type="text" id="start_date" name="start_date" required>
+        <label for="end_date">End Date (dd/mm/yyyy):</label>
+        <input type="text" id="end_date" name="end_date" required>
+        <input type="submit" value="Search">
+    </form>
+
+    {% if results %}
+        <h2>Search Results</h2>
+        <ul>
+            {% for result in results %}
+                <li>{{ result }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
