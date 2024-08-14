@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.4"#Load balancer service
+        version: "v0.1.5"
     spec:
       containers:
       - name: flask-report
@@ -49,13 +49,14 @@ kind: Service
 metadata:
   name: flask-report
 spec:
-  type: LoadBalancer
+  type: NodePort  # Changed from LoadBalancer to NodePort
   selector:
     app: flask-report
   ports:
     - protocol: TCP
       port: 80
       targetPort: 5000
+      nodePort: 30000  # Specify the NodePort (can be any port between 30000-32767)
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
