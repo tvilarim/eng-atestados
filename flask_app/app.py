@@ -1,6 +1,6 @@
+import os
 from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
 from werkzeug.utils import secure_filename
-import os
 import mysql.connector
 from pdf2image import convert_from_path
 import pytesseract
@@ -10,17 +10,17 @@ import hashlib
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/app/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
-app.secret_key = 'your_secret_key'  # Change this to a secure key
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'mysql-secret')  # Securely get the secret key
 
 # Ensure the upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Database connection configuration
+# Database connection configuration using environment variables
 db_config = {
-    'host': 'mysql-service',  # Use the MySQL service name
-    'user': 'root',
-    'password': 'khg45hj48Fmg',
-    'database': 'atestados'
+    'host': os.environ.get('MYSQL_HOST', 'mysql-service'),
+    'user': os.environ.get('MYSQL_USER', 'root'),
+    'password': os.environ.get('MYSQL_PASSWORD', ''),
+    'database': os.environ.get('MYSQL_DATABASE', 'atestados')
 }
 
 def allowed_file(filename):
