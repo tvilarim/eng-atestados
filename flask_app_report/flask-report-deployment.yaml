@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.6" #App Update to validate already existent table
+        version: "v0.1.7" # html update
     spec:
       containers:
       - name: flask-report
