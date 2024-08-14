@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1" ## Flask report container creation
+        version: "v0.1"
     spec:
       containers:
       - name: flask-report
@@ -24,8 +24,8 @@ spec:
         - name: FLASK_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: flask-secret
-              key: secret_key
+              name: flask-report-secret
+              key: FLASK_SECRET_KEY
         - name: MYSQL_HOST
           value: mysql-service
         - name: MYSQL_USER
@@ -33,8 +33,8 @@ spec:
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: mysql-secret
-              key: password
+              name: flask-report-secret
+              key: MYSQL_PASSWORD
         - name: MYSQL_DATABASE
           value: atestados
         volumeMounts:
