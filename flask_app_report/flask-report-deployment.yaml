@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask-app-deployment
+  name: flask-report-deployment
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: flask-app
+      app: flask-report
   template:
     metadata:
       labels:
-        app: flask-app
+        app: flask-report
         version: "v2.4.15" # reporttest branch
     spec:
       containers:
-      - name: flask-app
+      - name: flask-report
         image: tvilarim/flask-app-image:latest
         ports:
         - containerPort: 5000
