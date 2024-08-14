@@ -13,10 +13,11 @@ spec:
     metadata:
       labels:
         app: flask-report
+        version: "v0.1" ## Flask report container creation
     spec:
       containers:
       - name: flask-report
-        image: your-docker-registry/flask-report:latest
+        image: tvilarim/flask-report:latest
         ports:
         - containerPort: 5000
         env:
