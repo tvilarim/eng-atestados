@@ -142,9 +142,9 @@ def upload_file():
             
             # Check if the content already exists in the database
             if save_to_mysql(extracted_text, text_hash):
-                flash('File successfully uploaded and processed')
+                flash('File successfully uploaded and processed', 'success')
             else:
-                flash('Este arquivo já está no banco de dados.')
+                flash.error('Este arquivo já está no banco de dados. Pode seguir com o relatório', 'error')
             
             return redirect(url_for('upload_file'))
     
@@ -156,14 +156,14 @@ def search():
     end_date = request.args.get('end_date')
     
     if not start_date or not end_date:
-        flash('Start date and end date are required.')
+        flash('Start date and end date are required.', 'error')
         return redirect(url_for('upload_file'))
     
     try:
         datetime.strptime(start_date, '%d/%m/%Y')
         datetime.strptime(end_date, '%d/%m/%Y')
     except ValueError:
-        flash('Invalid date format. Use dd/mm/yyyy.')
+        flash('Invalid date format. Use dd/mm/yyyy.', 'error')
         return redirect(url_for('upload_file'))
     
     results = search_reports(start_date, end_date)
