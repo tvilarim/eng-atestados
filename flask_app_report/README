@@ -15,7 +15,10 @@ kubectl apply -f flask-report-deployment.yaml
 
 kubectl apply -f flask-report-service.yaml
 
-minikube service flask-report
+minikube tunnel
+
+kubectl get services flask-report-service
+
 
 
 
