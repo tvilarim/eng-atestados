@@ -13,6 +13,8 @@ kubectl set image deployment/flask-report flask-report=flask-report:latest
 
 kubectl apply -f flask-report-deployment.yaml
 
+kubectl apply -f flask-report-service.yaml
+
 minikube service flask-report
 
 
