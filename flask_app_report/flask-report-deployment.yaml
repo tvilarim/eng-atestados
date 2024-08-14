@@ -1,10 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask-report-deployment
-  namespace: default
+  name: flask-report
+  labels:
+    app: flask-report
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: flask-report
@@ -12,46 +13,61 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v2.4.15" # reporttest branch
     spec:
       containers:
       - name: flask-report
-        image: tvilarim/flask-app-image:latest
+        image: your-docker-registry/flask-report:latest
         ports:
         - containerPort: 5000
-        volumeMounts:
-        - name: uploads
-          mountPath: /app/uploads
         env:
-        - name: MYSQL_HOST
-          value: "mysql-service"
-        - name: MYSQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: mysql-user
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: mysql-root-password
-        - name: MYSQL_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: mysql-database
         - name: FLASK_SECRET_KEY
           valueFrom:
             secretKeyRef:
               name: flask-secret
-              key: secret-key
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+              key: secret_key
+        - name: MYSQL_HOST
+          value: mysql-service
+        - name: MYSQL_USER
+          value: root
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        - name: MYSQL_DATABASE
+          value: atestados
+        volumeMounts:
+        - name: uploads
+          mountPath: /app/uploads
       volumes:
       - name: uploads
         emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-report
+spec:
+  selector:
+    app: flask-report
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flask-report-ingress
+spec:
+  rules:
+  - host: flask-report.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: flask-report
+            port:
+              number: 80

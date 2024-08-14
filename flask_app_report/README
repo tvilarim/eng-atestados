@@ -3,13 +3,13 @@ Made by Vila
 To deploy run in order:
 
 docker login
-docker tag flask-app-image:latest tvilarim/flask-app-image:latest
-docker build -t tvilarim/flask-app-image:latest .
-docker push tvilarim/flask-app-image:latest
+docker tag flask-report-image:latest tvilarim/flask-report-image:latest
+
+docker build -t your-docker-registry/flask-report:latest .
+docker push your-docker-registry/flask-report:latest
 
 kubectl apply -f flask-report-deployment.yaml
-kubectl apply -f flask-app-service.yaml
 
-minikube service flask-app-service
+
 
 
