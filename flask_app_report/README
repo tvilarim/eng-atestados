@@ -10,6 +10,8 @@ docker push your-docker-registry/flask-report:latest
 
 kubectl apply -f flask-report-deployment.yaml
 
+minikube service flask-report
+
 
 
 
