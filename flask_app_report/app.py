@@ -144,7 +144,7 @@ def upload_file():
             if save_to_mysql(extracted_text, text_hash):
                 flash('File successfully uploaded and processed', 'success')
             else:
-                flash.error('Este arquivo já está no banco de dados. Pode seguir com o relatório', 'error')
+                flash('Este arquivo já está no banco de dados. Pode seguir com o relatório', 'error')
             
             return redirect(url_for('upload_file'))
     
