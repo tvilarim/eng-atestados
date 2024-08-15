@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.31" # EXTRACTING FILE TEXT - adjust date format
+        version: "v0.1.32" # rollback to the v0.1.30 state
     spec:
       containers:
       - name: flask-report
