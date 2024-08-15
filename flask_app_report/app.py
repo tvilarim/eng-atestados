@@ -58,14 +58,14 @@ def extract_dates(text):
     end_date = None
 
     if start_date_match:
-        start_date = datetime.strptime(start_date_match.group(1), '%d/%m/%Y').strftime('%d/%m/%Y')
+        start_date = datetime.strptime(start_date_match.group(1), '%d/%m/%Y').strftime('%Y-%m-%d')
     if end_date_match:
-        end_date = datetime.strptime(end_date_match.group(1), '%d/%m/%Y').strftime('%d/%m/%Y')
+        end_date = datetime.strptime(end_date_match.group(1), '%d/%m/%Y').strftime('%Y-%m-%d')
 
     # Check if both dates are found
     if not start_date or not end_date:
         flash("Error: Could not find the required dates in the text.", "error")
-
+    
     return start_date, end_date
 
 def calculate_hash(text):
@@ -77,7 +77,7 @@ def save_to_mysql(text, text_hash, start_date, end_date):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Create table if not exists with d1 and d2 fields for dates
+        # Create table if not exists
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS pdf_text (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -94,10 +94,12 @@ def save_to_mysql(text, text_hash, start_date, end_date):
             return False  # Hash already exists, do not insert
 
         # Insert extracted text, hash, and dates into the table
-        cursor.execute('INSERT INTO pdf_text (text, text_hash, d1, d2) VALUES (%s, %s, %s, %s)', 
-                       (text, text_hash, start_date, end_date))
-        connection.commit()
+        cursor.execute('''
+            INSERT INTO pdf_text (text, text_hash, d1, d2) 
+            VALUES (%s, %s, %s, %s)
+        ''', (text, text_hash, start_date, end_date))
         
+        connection.commit()
         return True
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -180,6 +182,14 @@ def search():
             selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d')
         except ValueError:
             flash('Invalid date format. Please use the calendar to select a date.', 'error')
+            return redirect(url_for('search'))
+
+        # Extract dates from the PDF text
+        pdf_text = process_pdf('path/to/your/pdf')  # You need to provide the correct path to the PDF
+        start_date, end_date = extract_dates(pdf_text)
+
+        # If the dates are missing, the error flash message will already be shown
+        if not start_date or not end_date:
             return redirect(url_for('search'))
 
         # Pass the datetime object to search_reports
