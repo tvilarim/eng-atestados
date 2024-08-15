@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.23" # Still Creating d1 and d2 as start_date and end_date in DB
+        version: "v0.1.24" # uploadfile() fixes
     spec:
       containers:
       - name: flask-report

@@ -158,8 +158,16 @@ def upload_file():
             extracted_text = process_pdf(file_path)
             text_hash = calculate_hash(extracted_text)
             
+            # Extract dates from the PDF text
+            start_date, end_date = extract_dates(extracted_text)
+            
+            # Check if the dates were successfully extracted
+            if not start_date or not end_date:
+                flash('Could not extract required dates from the PDF.', 'error')
+                return redirect(request.url)
+            
             # Check if the content already exists in the database
-            if save_to_mysql(extracted_text, text_hash):
+            if save_to_mysql(extracted_text, text_hash, start_date, end_date):
                 flash('File successfully uploaded and processed', 'success')
             else:
                 flash('Este arquivo já está no banco de dados. Pode seguir com o relatório', 'error')
