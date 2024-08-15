@@ -162,21 +162,22 @@ def upload_file():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
-        selected_date = request.form.get('selected_date')
+        selected_date_str = request.form.get('selected_date')
         
-        if not selected_date:
+        if not selected_date_str:
             flash('Please select a date.', 'error')
             return redirect(url_for('search'))
 
         try:
-            # Convert selected_date to datetime object
-            selected_date = datetime.strptime(selected_date, '%Y-%m-%d')
+            # Convert the date from 'yyyy-mm-dd' to a datetime object
+            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d')
         except ValueError:
             flash('Invalid date format. Please use the calendar to select a date.', 'error')
             return redirect(url_for('search'))
 
+        # Pass the datetime object to search_reports
         results = search_reports(selected_date)
-        return render_template('search.html', results=results, selected_date=selected_date)
+        return render_template('search.html', results=results, selected_date=selected_date_str)
     
     return render_template('search.html')
 
@@ -186,35 +187,34 @@ def search_reports(selected_date):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
         
+        # Prepare the query to search for matches
         query = '''
             SELECT text
             FROM pdf_text
             WHERE text LIKE %s OR text LIKE %s
         '''
-        start_pattern = '%Data de início:%'
-        end_pattern = '%Conclusão Efetiva:%'
+        # Create patterns for search
+        start_pattern = '%Data de início: %'
+        end_pattern = '%Conclusão Efetiva: %'
         cursor.execute(query, (start_pattern, end_pattern))
-        
+
         results = cursor.fetchall()
-        
-        # Convert selected_date to datetime object
-        selected_date = datetime.strptime(selected_date, '%Y-%m-%d')
 
         # Filter results to include only those within the date range
         filtered_results = []
         for result in results:
             text = result[0]
             try:
-                # Extract and parse the "Data de início" date
+                # Extract and parse start date
                 start_date_str = text.split('Data de início: ')[1].split()[0]
-                start_date_text = datetime.strptime(start_date_str, '%d/%m/%Y')
-
-                # Extract and parse the "Conclusão Efetiva" date
+                start_date = datetime.strptime(start_date_str, '%d/%m/%Y')
+                
+                # Extract and parse end date
                 end_date_str = text.split('Conclusão Efetiva: ')[1].split()[0]
-                end_date_text = datetime.strptime(end_date_str, '%d/%m/%Y')
+                end_date = datetime.strptime(end_date_str, '%d/%m/%Y')
 
-                # Check if the extracted dates fall within the specified range
-                if start_date_text <= selected_date <= end_date_text:
+                # Check if selected_date is between start_date and end_date
+                if start_date <= selected_date <= end_date:
                     filtered_results.append(text)
             except (IndexError, ValueError):
                 continue
