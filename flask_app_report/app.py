@@ -75,7 +75,7 @@ def extract_dates(text):
 def calculate_hash(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
-def save_to_mysql(text, text_hash, start_date, end_date):
+def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
     try:
         # Connect to the MySQL database
         connection = mysql.connector.connect(**db_config)
@@ -88,7 +88,8 @@ def save_to_mysql(text, text_hash, start_date, end_date):
                 text LONGTEXT,
                 text_hash VARCHAR(64) UNIQUE,
                 d1 DATE,
-                d2 DATE
+                d2 DATE,
+                pdf_name VARCHAR(255)
             )
         ''')
         
@@ -97,11 +98,11 @@ def save_to_mysql(text, text_hash, start_date, end_date):
         if cursor.fetchone()[0] > 0:
             return False  # Hash already exists, do not insert
 
-        # Insert extracted text, hash, and dates into the table
+        # Insert extracted text, hash, dates, and pdf name into the table
         cursor.execute('''
-            INSERT INTO pdf_text (text, text_hash, d1, d2) 
-            VALUES (%s, %s, %s, %s)
-        ''', (text, text_hash, start_date, end_date))
+            INSERT INTO pdf_text (text, text_hash, d1, d2, pdf_name) 
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (text, text_hash, start_date, end_date, pdf_name))
         
         connection.commit()
         return True
@@ -120,7 +121,7 @@ def search_reports(selected_date):
 
         # Prepare the query to search for matches within the date range
         query = '''
-            SELECT text
+            SELECT text, pdf_name
             FROM pdf_text
             WHERE d1 <= %s AND d2 >= %s
         '''
@@ -132,8 +133,8 @@ def search_reports(selected_date):
         cursor.close()
         connection.close()
 
-        # Extract the text from the results
-        filtered_results = [result[0] for result in results]
+        # Extract the text and pdf name from the results
+        filtered_results = [{'text': result[0], 'pdf_name': result[1]} for result in results]
 
         return filtered_results
     except mysql.connector.Error as err:
@@ -171,7 +172,7 @@ def upload_file():
                 flash('Could not extract required dates from the PDF.', 'error')
             
             # Check if the content already exists in the database
-            if save_to_mysql(extracted_text, text_hash, start_date, end_date):
+            if save_to_mysql(extracted_text, text_hash, start_date, end_date, filename):
                 flash('File successfully uploaded and processed', 'success')
             else:
                 flash('Este arquivo já está no banco de dados. Pode seguir com o relatório', 'error')
