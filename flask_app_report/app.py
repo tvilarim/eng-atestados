@@ -91,7 +91,7 @@ def search_reports(selected_date):
             WHERE text LIKE %s OR text LIKE %s
         '''
         start_pattern = '%Data de início:%'
-        end_pattern = '%Conclusão Efetiva:%'
+        end_pattern = '%Efetiva:%'
         cursor.execute(query, (start_pattern, end_pattern))
         
         results = cursor.fetchall()
@@ -110,7 +110,7 @@ def search_reports(selected_date):
                 start_date_text = datetime.strptime(start_date_str, '%d/%m/%Y')
 
                 # Extract and parse the "Conclusão Efetiva" date
-                end_date_str = text.split('Conclusão Efetiva: ')[1].split()[0]
+                end_date_str = text.split('Efetiva: ')[1].split()[0]
                 end_date_text = datetime.strptime(end_date_str, '%d/%m/%Y')
 
                 # Check if the extracted dates fall within the specified range
@@ -195,7 +195,7 @@ def search_reports(selected_date):
         '''
         # Create patterns for search
         start_pattern = '%Data de início: %'
-        end_pattern = '%Conclusão Efetiva: %'
+        end_pattern = '%Efetiva: %'
         cursor.execute(query, (start_pattern, end_pattern))
 
         results = cursor.fetchall()
@@ -210,7 +210,7 @@ def search_reports(selected_date):
                 start_date = datetime.strptime(start_date_str, '%d/%m/%Y')
                 
                 # Extract and parse end date
-                end_date_str = text.split('Conclusão Efetiva: ')[1].split()[0]
+                end_date_str = text.split('Efetiva: ')[1].split()[0]
                 end_date = datetime.strptime(end_date_str, '%d/%m/%Y')
 
                 # Check if selected_date is between start_date and end_date
