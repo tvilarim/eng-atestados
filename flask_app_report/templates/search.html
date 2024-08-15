@@ -5,77 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Reports</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #007bff;
-            font-size: 24px;
-        }
-        .alert {
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid transparent;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        .alert.error {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-        form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            font-size: 16px;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        input[type="date"], button {
-            margin-top: 10px;
-            font-size: 16px;
-        }
-        button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .results {
-            margin-top: 20px;
-        }
-        .results h2 {
-            color: #007bff;
-            font-size: 20px;
-        }
-        .results ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .results li {
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
+        /* Your existing styles here */
     </style>
 </head>
 <body>
@@ -97,7 +27,7 @@
         
         {% if results %}
             <div class="results">
-                <h2>Search Results for {{ selected_date.strftime('%d/%m/%Y') }}:</h2>
+                <h2>Search Results:</h2>
                 <ul>
                     {% for result in results %}
                         <li>
@@ -107,7 +37,9 @@
                 </ul>
             </div>
         {% else %}
-            <p>No results found for {{ selected_date.strftime('%d/%m/%Y') }}.</p>
+            {% if selected_date %}
+                <p>No results found for {{ selected_date.strftime('%d/%m/%Y') }}.</p>
+            {% endif %}
         {% endif %}
     </div>
 </body>

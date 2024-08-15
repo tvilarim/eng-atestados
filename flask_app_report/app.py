@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
+from flask import Flask, request, render_template, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 import mysql.connector
 from pdf2image import convert_from_path
@@ -177,7 +177,7 @@ def search():
 
         # Pass the datetime object to search_reports
         results = search_reports(selected_date)
-        return render_template('search.html', results=results, selected_date=selected_date_str)
+        return render_template('search.html', results=results, selected_date=selected_date)
     
     return render_template('search.html')
 
