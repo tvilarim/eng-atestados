@@ -59,9 +59,9 @@ def extract_dates(text):
     end_date = None
 
     if start_date_match:
-        start_date = datetime.strptime(start_date_match.group(1), '%d/%m/%Y').strftime('%Y-%m-%d')
+        start_date = datetime.strptime(start_date_match.group(1), '%d/%m/%Y').strftime('%d/%m/%Y')
     if end_date_match:
-        end_date = datetime.strptime(end_date_match.group(1), '%d/%m/%Y').strftime('%Y-%m-%d')
+        end_date = datetime.strptime(end_date_match.group(1), '%d/%m/%Y').strftime('%d/%m/%Y')
 
     # Check if both dates are found
     if not start_date or not end_date:
@@ -189,8 +189,8 @@ def search():
             return redirect(url_for('search'))
 
         try:
-            # Convert the date from 'yyyy-mm-dd' to a datetime object
-            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d')
+            # Convert the date from 'dd/mm/yyyy' to a datetime object
+            selected_date = datetime.strptime(selected_date_str, '%d/%m/%Y')
         except ValueError:
             flash('Invalid date format. Please use the calendar to select a date.', 'error')
             return redirect(url_for('search'))
@@ -199,52 +199,6 @@ def search():
         results = search_reports(selected_date)
     
     return render_template('search.html', results=results, selected_date=selected_date)
-
-def search_reports(selected_date):
-    try:
-        # Connect to the MySQL database
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor()
-        
-        # Prepare the query to search for matches
-        query = '''
-            SELECT text
-            FROM pdf_text
-            WHERE text LIKE %s OR text LIKE %s
-        '''
-        # Create patterns for search
-        start_pattern = '%Data de início: %'
-        end_pattern = '%Efetiva: %'
-        cursor.execute(query, (start_pattern, end_pattern))
-
-        results = cursor.fetchall()
-
-        # Filter results to include only those within the date range
-        filtered_results = []
-        for result in results:
-            text = result[0]
-            try:
-                # Extract and parse start date
-                start_date_str = text.split('Data de início: ')[1].split()[0]
-                start_date = datetime.strptime(start_date_str, '%d/%m/%Y')
-                
-                # Extract and parse end date
-                end_date_str = text.split('Efetiva: ')[1].split()[0]
-                end_date = datetime.strptime(end_date_str, '%d/%m/%Y')
-
-                # Check if selected_date is between start_date and end_date
-                if start_date <= selected_date <= end_date:
-                    filtered_results.append(text)
-            except (IndexError, ValueError):
-                continue
-        
-        return filtered_results
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        return []
-    finally:
-        cursor.close()
-        connection.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
