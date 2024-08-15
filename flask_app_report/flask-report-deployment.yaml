@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.25" # import re
+        version: "v0.1.26" # EXTRACTING FILE TEXT AND DISPLAY
     spec:
       containers:
       - name: flask-report

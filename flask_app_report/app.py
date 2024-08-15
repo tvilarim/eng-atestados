@@ -139,6 +139,7 @@ def search_reports(selected_date):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    extracted_text = ""
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
@@ -165,7 +166,6 @@ def upload_file():
             # Check if the dates were successfully extracted
             if not start_date or not end_date:
                 flash('Could not extract required dates from the PDF.', 'error')
-                return redirect(request.url)
             
             # Check if the content already exists in the database
             if save_to_mysql(extracted_text, text_hash, start_date, end_date):
@@ -173,12 +173,14 @@ def upload_file():
             else:
                 flash('Este arquivo já está no banco de dados. Pode seguir com o relatório', 'error')
             
-            return redirect(url_for('upload_file'))
+            return render_template('upload.html', text=extracted_text)
     
-    return render_template('upload.html')
+    return render_template('upload.html', text=extracted_text)
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
+    results = []
+    selected_date = None
     if request.method == 'POST':
         selected_date_str = request.form.get('selected_date')
         
@@ -193,19 +195,10 @@ def search():
             flash('Invalid date format. Please use the calendar to select a date.', 'error')
             return redirect(url_for('search'))
 
-        # Extract dates from the PDF text
-        pdf_text = process_pdf('path/to/your/pdf')  # You need to provide the correct path to the PDF
-        start_date, end_date = extract_dates(pdf_text)
-
-        # If the dates are missing, the error flash message will already be shown
-        if not start_date or not end_date:
-            return redirect(url_for('search'))
-
-        # Pass the datetime object to search_reports
+        # Perform the search and get results
         results = search_reports(selected_date)
-        return render_template('search.html', results=results, selected_date=selected_date)
     
-    return render_template('search.html')
+    return render_template('search.html', results=results, selected_date=selected_date)
 
 def search_reports(selected_date):
     try:

@@ -5,7 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Reports</title>
     <style>
-        /* Your existing styles here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            font-size: 24px;
+        }
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .alert.success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .alert.error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        input[type="date"], button {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .results h2 {
+            color: #007bff;
+            font-size: 20px;
+        }
+        .results ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .results li {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .extracted-text {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .extracted-text h2 {
+            color: #007bff;
+        }
+        .extracted-text pre {
+            white-space: pre-wrap; /* Allows long text to wrap */
+        }
     </style>
 </head>
 <body>
@@ -24,6 +112,13 @@
             <input type="date" id="selected_date" name="selected_date" required>
             <button type="submit">Search</button>
         </form>
+        
+        {% if extracted_text %}
+            <div class="extracted-text">
+                <h2>Extracted Text</h2>
+                <pre>{{ extracted_text }}</pre>
+            </div>
+        {% endif %}
         
         {% if results %}
             <div class="results">
