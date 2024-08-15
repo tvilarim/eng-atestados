@@ -47,22 +47,25 @@ def process_pdf(pdf_path):
 
 def extract_dates(text):
     # Regex patterns to extract dates
-    start_date_pattern = r'Data de início:\s*(\d{2}/\d{2}/\d{4})'
-    end_date_pattern = r'Conclusão Efetiva:\s*(\d{2}/\d{2}/\d{4})'
-
+    date_pattern = r'periodo de\s+(\d{2}-\d{2}-\d{4})\s+a\s+(\d{2}-\d{2}-\d{4})'
+    
     # Find the dates in the text
-    start_date_match = re.search(start_date_pattern, text)
-    end_date_match = re.search(end_date_pattern, text)
-
-    # Convert the dates to dd/mm/yyyy format if found
+    match = re.search(date_pattern, text)
+    
+    # Initialize the start_date and end_date
     start_date = None
     end_date = None
 
-    if start_date_match:
-        start_date = datetime.strptime(start_date_match.group(1), '%d/%m/%Y').strftime('%d/%m/%Y')
-    if end_date_match:
-        end_date = datetime.strptime(end_date_match.group(1), '%d/%m/%Y').strftime('%d/%m/%Y')
-
+    if match:
+        start_date_str, end_date_str = match.groups()
+        
+        # Convert the dates from dd-mm-yyyy to yyyy-mm-dd format
+        try:
+            start_date = datetime.strptime(start_date_str, '%d-%m-%Y').strftime('%d/%m/%Y')
+            end_date = datetime.strptime(end_date_str, '%d-%m-%Y').strftime('%d/%m/%Y')
+        except ValueError:
+            flash("Error: Date format in the text is incorrect.", "error")
+    
     # Check if both dates are found
     if not start_date or not end_date:
         flash("Error: Could not find the required dates in the text.", "error")
@@ -189,8 +192,8 @@ def search():
             return redirect(url_for('search'))
 
         try:
-            # Convert the date from 'dd/mm/yyyy' to a datetime object
-            selected_date = datetime.strptime(selected_date_str, '%d/%m/%Y')
+            # Convert the date from 'yyyy-mm-dd' to a datetime object
+            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d')
         except ValueError:
             flash('Invalid date format. Please use the calendar to select a date.', 'error')
             return redirect(url_for('search'))

@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.27" # EXTRACTING FILE TEXT AND DISPLAY - Changing the get dates string
+        version: "v0.1.27" # EXTRACTING FILE TEXT AND DISPLAY Fixing the get dates string
     spec:
       containers:
       - name: flask-report
