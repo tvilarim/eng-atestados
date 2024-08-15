@@ -150,24 +150,45 @@ def upload_file():
     
     return render_template('upload.html')
 
-@app.route('/search', methods=['GET'])
+@app.route('/search', methods=['GET', 'POST'])
 def search():
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
+    if request.method == 'POST':
+        selected_date = request.form.get('selected_date')
+        
+        if not selected_date:
+            flash('Please select a date.', 'error')
+            return redirect(url_for('search'))
+
+        try:
+            selected_date = datetime.strptime(selected_date, '%Y-%m-%d')
+        except ValueError:
+            flash('Invalid date format. Please use the calendar to select a date.', 'error')
+            return redirect(url_for('search'))
+
+        results = search_reports(selected_date)
+        return render_template('search.html', results=results)
     
-    if not start_date or not end_date:
-        flash('Start date and end date are required.', 'error')
-        return redirect(url_for('upload_file'))
+    return render_template('search.html')
+
+def search_reports(selected_date):
+    # This function should contain the logic to search your database
+    # and return records where the selected date is between 'Data de início' and 'Conclusão Efetiva'.
+    # Replace the below sample code with your database query logic.
     
-    try:
-        datetime.strptime(start_date, '%d/%m/%Y')
-        datetime.strptime(end_date, '%d/%m/%Y')
-    except ValueError:
-        flash('Invalid date format. Use dd/mm/yyyy.', 'error')
-        return redirect(url_for('upload_file'))
+    # Sample data (replace with actual database queries)
+    reports = [
+        {'title': 'Project A', 'start_date': '01/01/2024', 'end_date': '31/01/2024'},
+        {'title': 'Project B', 'start_date': '15/02/2024', 'end_date': '15/03/2024'},
+    ]
     
-    results = search_reports(start_date, end_date)
-    return render_template('upload.html', results=results)
+    results = []
+    for report in reports:
+        start_date = datetime.strptime(report['start_date'], '%d/%m/%Y')
+        end_date = datetime.strptime(report['end_date'], '%d/%m/%Y')
+        if start_date <= selected_date <= end_date:
+            results.append(report)
+    
+    return results
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
