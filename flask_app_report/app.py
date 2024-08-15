@@ -84,37 +84,34 @@ def search_reports(selected_date):
         # Connect to the MySQL database
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
-        
+
+        # Prepare the query to search for matches
         query = '''
             SELECT text
             FROM pdf_text
             WHERE text LIKE %s OR text LIKE %s
         '''
-        start_pattern = '%Data de início:%'
-        end_pattern = '%Efetiva:%'
+        start_pattern = f'%Data de início: {selected_date.strftime("%d/%m/%Y")}%'
+        end_pattern = f'%Conclusão Efetiva: {selected_date.strftime("%d/%m/%Y")}%'
         cursor.execute(query, (start_pattern, end_pattern))
-        
-        results = cursor.fetchall()
 
-        # Convert selected_date to a datetime object if it's not already one
-        if isinstance(selected_date, str):
-            selected_date = datetime.strptime(selected_date, '%Y-%m-%d')
+        results = cursor.fetchall()
+        
+        # Close the connection
+        cursor.close()
+        connection.close()
 
         # Filter results to include only those within the date range
         filtered_results = []
         for result in results:
             text = result[0]
             try:
-                # Extract and parse the "Data de início" date
+                # Extract start and end dates from the text
                 start_date_str = text.split('Data de início: ')[1].split()[0]
-                start_date_text = datetime.strptime(start_date_str, '%d/%m/%Y')
-
-                # Extract and parse the "Conclusão Efetiva" date
-                end_date_str = text.split('Efetiva: ')[1].split()[0]
-                end_date_text = datetime.strptime(end_date_str, '%d/%m/%Y')
-
-                # Check if the extracted dates fall within the specified range
-                if start_date_text <= selected_date <= end_date_text:
+                end_date_str = text.split('Conclusão Efetiva: ')[1].split()[0]
+                start_date = datetime.strptime(start_date_str, '%d/%m/%Y')
+                end_date = datetime.strptime(end_date_str, '%d/%m/%Y')
+                if start_date <= selected_date <= end_date:
                     filtered_results.append(text)
             except (IndexError, ValueError):
                 continue
@@ -123,9 +120,6 @@ def search_reports(selected_date):
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return []
-    finally:
-        cursor.close()
-        connection.close()
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
