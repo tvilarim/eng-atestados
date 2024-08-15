@@ -113,19 +113,19 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
         cursor.close()
         connection.close()
 
-def search_reports(selected_date):
+def search_reports(start_date, end_date):
     try:
         # Connect to the MySQL database
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Prepare the query to search for matches within the date range
+        # Prepare the query to search for intersection with the date range
         query = '''
             SELECT text, pdf_name
             FROM pdf_text
-            WHERE d1 <= %s AND d2 >= %s
+            WHERE (d1 <= %s AND d2 >= %s) OR (d1 <= %s AND d2 >= %s)
         '''
-        cursor.execute(query, (selected_date, selected_date))
+        cursor.execute(query, (end_date, start_date, start_date, end_date))
 
         results = cursor.fetchall()
 
@@ -184,25 +184,28 @@ def upload_file():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     results = []
-    selected_date = None
+    start_date = None
+    end_date = None
     if request.method == 'POST':
-        selected_date_str = request.form.get('selected_date')
+        start_date_str = request.form.get('start_date')
+        end_date_str = request.form.get('end_date')
         
-        if not selected_date_str:
-            flash('Please select a date.', 'error')
+        if not start_date_str or not end_date_str:
+            flash('Please select both start and end dates.', 'error')
             return redirect(url_for('search'))
 
         try:
-            # Convert the date from 'yyyy-mm-dd' to a datetime object
-            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d')
+            # Convert the dates from 'yyyy-mm-dd' to datetime objects
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
         except ValueError:
-            flash('Invalid date format. Please use the calendar to select a date.', 'error')
+            flash('Invalid date format. Please use the calendar to select dates.', 'error')
             return redirect(url_for('search'))
 
         # Perform the search and get results
-        results = search_reports(selected_date)
+        results = search_reports(start_date, end_date)
     
-    return render_template('search.html', results=results, selected_date=selected_date)
+    return render_template('search.html', results=results, start_date=start_date, end_date=end_date)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
