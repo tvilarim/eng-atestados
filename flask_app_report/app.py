@@ -61,8 +61,8 @@ def extract_dates(text):
         
         # Convert the dates to a standard format (if needed)
         try:
-            start_date = datetime.strptime(start_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
-            end_date = datetime.strptime(end_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
+            start_date = datetime.strptime(start_date_str, '%d/%m/%Y').strftime('%d-%m-%Y')
+            end_date = datetime.strptime(end_date_str, '%d/%m/%Y').strftime('%d-%m-%Y')
         except ValueError:
             flash("Error: Date format in the text is incorrect.", "error")
     
@@ -194,7 +194,7 @@ def search():
 
         try:
             # Convert the date from 'yyyy-mm-dd' to a datetime object
-            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d')
+            selected_date = datetime.strptime(selected_date_str, '%d-%m-%Y')
         except ValueError:
             flash('Invalid date format. Please use the calendar to select a date.', 'error')
             return redirect(url_for('search'))

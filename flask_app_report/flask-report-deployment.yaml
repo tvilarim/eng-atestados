@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.30" # EXTRACTING FILE TEXT - get the pdf filename and create a field in table
+        version: "v0.1.31" # EXTRACTING FILE TEXT - adjust date format
     spec:
       containers:
       - name: flask-report
