@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.15"
+        version: "v0.1.16"
     spec:
       containers:
       - name: flask-report

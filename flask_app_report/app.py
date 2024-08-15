@@ -79,13 +79,12 @@ def save_to_mysql(text, text_hash):
         cursor.close()
         connection.close()
 
-def search_reports(start_date, end_date):
+def search_reports(selected_date):
     try:
         # Connect to the MySQL database
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
         
-        # Prepare the query to search for matches
         query = '''
             SELECT text
             FROM pdf_text
@@ -96,10 +95,10 @@ def search_reports(start_date, end_date):
         cursor.execute(query, (start_pattern, end_pattern))
         
         results = cursor.fetchall()
-        
-        # Convert start_date and end_date to datetime objects
-        start_date = datetime.strptime(start_date, '%d/%m/%Y')
-        end_date = datetime.strptime(end_date, '%d/%m/%Y')
+
+        # Convert selected_date to a datetime object if it's not already one
+        if isinstance(selected_date, str):
+            selected_date = datetime.strptime(selected_date, '%Y-%m-%d')
 
         # Filter results to include only those within the date range
         filtered_results = []
@@ -115,10 +114,9 @@ def search_reports(start_date, end_date):
                 end_date_text = datetime.strptime(end_date_str, '%d/%m/%Y')
 
                 # Check if the extracted dates fall within the specified range
-                if start_date <= start_date_text <= end_date and start_date <= end_date_text <= end_date:
+                if start_date_text <= selected_date <= end_date_text:
                     filtered_results.append(text)
             except (IndexError, ValueError):
-                # Handle any parsing errors
                 continue
         
         return filtered_results
@@ -171,6 +169,7 @@ def search():
             return redirect(url_for('search'))
 
         try:
+            # Convert selected_date to datetime object
             selected_date = datetime.strptime(selected_date, '%Y-%m-%d')
         except ValueError:
             flash('Invalid date format. Please use the calendar to select a date.', 'error')
