@@ -46,8 +46,8 @@ def process_pdf(pdf_path):
     return combined_text
 
 def extract_dates(text):
-    # Regex patterns to extract dates
-    date_pattern = r'periodo de\s+(\d{2}-\d{2}-\d{4})\s+a\s+(\d{2}-\d{2}-\d{4})'
+    # Regex pattern to extract dates in dd/mm/yyyy format
+    date_pattern = r'periodo de (\d{2}/\d{2}/\d{4}) a (\d{2}/\d{2}/\d{4})'
     
     # Find the dates in the text
     match = re.search(date_pattern, text)
@@ -59,10 +59,10 @@ def extract_dates(text):
     if match:
         start_date_str, end_date_str = match.groups()
         
-        # Convert the dates from dd-mm-yyyy to yyyy-mm-dd format
+        # Convert the dates to a standard format (if needed)
         try:
-            start_date = datetime.strptime(start_date_str, '%d-%m-%Y').strftime('%d/%m/%Y')
-            end_date = datetime.strptime(end_date_str, '%d-%m-%Y').strftime('%d/%m/%Y')
+            start_date = datetime.strptime(start_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
         except ValueError:
             flash("Error: Date format in the text is incorrect.", "error")
     
