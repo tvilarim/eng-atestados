@@ -44,21 +44,47 @@ def process_pdf(pdf_path):
     
     return combined_text
 
+def extract_dates(text):
+    # Regex patterns to extract dates
+    start_date_pattern = r'Data de início:\s*(\d{2}/\d{2}/\d{4})'
+    end_date_pattern = r'Conclusão Efetiva:\s*(\d{2}/\d{2}/\d{4})'
+
+    # Find the dates in the text
+    start_date_match = re.search(start_date_pattern, text)
+    end_date_match = re.search(end_date_pattern, text)
+
+    # Convert the dates to dd/mm/yyyy format if found
+    start_date = None
+    end_date = None
+
+    if start_date_match:
+        start_date = datetime.strptime(start_date_match.group(1), '%d/%m/%Y').strftime('%d/%m/%Y')
+    if end_date_match:
+        end_date = datetime.strptime(end_date_match.group(1), '%d/%m/%Y').strftime('%d/%m/%Y')
+
+    # Check if both dates are found
+    if not start_date or not end_date:
+        flash("Error: Could not find the required dates in the text.", "error")
+
+    return start_date, end_date
+
 def calculate_hash(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
-def save_to_mysql(text, text_hash):
+def save_to_mysql(text, text_hash, start_date, end_date):
     try:
         # Connect to the MySQL database
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Create table if not exists
+        # Create table if not exists with d1 and d2 fields for dates
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS pdf_text (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 text LONGTEXT,
-                text_hash VARCHAR(64) UNIQUE
+                text_hash VARCHAR(64) UNIQUE,
+                d1 DATE,
+                d2 DATE
             )
         ''')
         
@@ -67,8 +93,9 @@ def save_to_mysql(text, text_hash):
         if cursor.fetchone()[0] > 0:
             return False  # Hash already exists, do not insert
 
-        # Insert extracted text and hash into the table
-        cursor.execute('INSERT INTO pdf_text (text, text_hash) VALUES (%s, %s)', (text, text_hash))
+        # Insert extracted text, hash, and dates into the table
+        cursor.execute('INSERT INTO pdf_text (text, text_hash, d1, d2) VALUES (%s, %s, %s, %s)', 
+                       (text, text_hash, start_date, end_date))
         connection.commit()
         
         return True
@@ -85,37 +112,23 @@ def search_reports(selected_date):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Prepare the query to search for matches
+        # Prepare the query to search for matches within the date range
         query = '''
             SELECT text
             FROM pdf_text
-            WHERE text LIKE %s OR text LIKE %s
+            WHERE d1 <= %s AND d2 >= %s
         '''
-        start_pattern = f'%Data de início: {selected_date.strftime("%d/%m/%Y")}%'
-        end_pattern = f'%Conclusão Efetiva: {selected_date.strftime("%d/%m/%Y")}%'
-        cursor.execute(query, (start_pattern, end_pattern))
+        cursor.execute(query, (selected_date, selected_date))
 
         results = cursor.fetchall()
-        
+
         # Close the connection
         cursor.close()
         connection.close()
 
-        # Filter results to include only those within the date range
-        filtered_results = []
-        for result in results:
-            text = result[0]
-            try:
-                # Extract start and end dates from the text
-                start_date_str = text.split('Data de início: ')[1].split()[0]
-                end_date_str = text.split('Conclusão Efetiva: ')[1].split()[0]
-                start_date = datetime.strptime(start_date_str, '%d/%m/%Y')
-                end_date = datetime.strptime(end_date_str, '%d/%m/%Y')
-                if start_date <= selected_date <= end_date:
-                    filtered_results.append(text)
-            except (IndexError, ValueError):
-                continue
-        
+        # Extract the text from the results
+        filtered_results = [result[0] for result in results]
+
         return filtered_results
     except mysql.connector.Error as err:
         print(f"Error: {err}")
