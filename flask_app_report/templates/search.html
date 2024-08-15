@@ -97,7 +97,7 @@
         
         {% if results %}
             <div class="results">
-                <h2>Search Results:</h2>
+                <h2>Search Results for {{ selected_date.strftime('%d/%m/%Y') }}:</h2>
                 <ul>
                     {% for result in results %}
                         <li>
@@ -106,6 +106,8 @@
                     {% endfor %}
                 </ul>
             </div>
+        {% else %}
+            <p>No results found for {{ selected_date.strftime('%d/%m/%Y') }}.</p>
         {% endif %}
     </div>
 </body>
