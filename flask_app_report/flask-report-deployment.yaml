@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.24" # uploadfile() fixes
+        version: "v0.1.25" # import re
     spec:
       containers:
       - name: flask-report
