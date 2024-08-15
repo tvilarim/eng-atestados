@@ -89,25 +89,36 @@ def search_reports(start_date, end_date):
         query = '''
             SELECT text
             FROM pdf_text
-            WHERE text LIKE %s
+            WHERE text LIKE %s OR text LIKE %s
         '''
-        search_pattern = f'%Data de início: {start_date}%'
-        cursor.execute(query, (search_pattern,))
+        start_pattern = '%Data de início:%'
+        end_pattern = '%Conclusão Efetiva:%'
+        cursor.execute(query, (start_pattern, end_pattern))
         
         results = cursor.fetchall()
         
+        # Convert start_date and end_date to datetime objects
+        start_date = datetime.strptime(start_date, '%d/%m/%Y')
+        end_date = datetime.strptime(end_date, '%d/%m/%Y')
+
         # Filter results to include only those within the date range
         filtered_results = []
         for result in results:
             text = result[0]
-            # Extract date from the text and check if it falls within the range
-            # Assuming date format is "dd/mm/yyyy"
             try:
-                date_str = text.split('Data de início: ')[1].split()[0]
-                date = datetime.strptime(date_str, '%d/%m/%Y')
-                if datetime.strptime(start_date, '%d/%m/%Y') <= date <= datetime.strptime(end_date, '%d/%m/%Y'):
+                # Extract and parse the "Data de início" date
+                start_date_str = text.split('Data de início: ')[1].split()[0]
+                start_date_text = datetime.strptime(start_date_str, '%d/%m/%Y')
+
+                # Extract and parse the "Conclusão Efetiva" date
+                end_date_str = text.split('Conclusão Efetiva: ')[1].split()[0]
+                end_date_text = datetime.strptime(end_date_str, '%d/%m/%Y')
+
+                # Check if the extracted dates fall within the specified range
+                if start_date <= start_date_text <= end_date and start_date <= end_date_text <= end_date:
                     filtered_results.append(text)
             except (IndexError, ValueError):
+                # Handle any parsing errors
                 continue
         
         return filtered_results
@@ -166,29 +177,56 @@ def search():
             return redirect(url_for('search'))
 
         results = search_reports(selected_date)
-        return render_template('search.html', results=results)
+        return render_template('search.html', results=results, selected_date=selected_date)
     
     return render_template('search.html')
 
 def search_reports(selected_date):
-    # This function should contain the logic to search your database
-    # and return records where the selected date is between 'Data de início' and 'Conclusão Efetiva'.
-    # Replace the below sample code with your database query logic.
-    
-    # Sample data (replace with actual database queries)
-    reports = [
-        {'title': 'Project A', 'start_date': '01/01/2024', 'end_date': '31/01/2024'},
-        {'title': 'Project B', 'start_date': '15/02/2024', 'end_date': '15/03/2024'},
-    ]
-    
-    results = []
-    for report in reports:
-        start_date = datetime.strptime(report['start_date'], '%d/%m/%Y')
-        end_date = datetime.strptime(report['end_date'], '%d/%m/%Y')
-        if start_date <= selected_date <= end_date:
-            results.append(report)
-    
-    return results
+    try:
+        # Connect to the MySQL database
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        
+        query = '''
+            SELECT text
+            FROM pdf_text
+            WHERE text LIKE %s OR text LIKE %s
+        '''
+        start_pattern = '%Data de início:%'
+        end_pattern = '%Conclusão Efetiva:%'
+        cursor.execute(query, (start_pattern, end_pattern))
+        
+        results = cursor.fetchall()
+        
+        # Convert selected_date to datetime object
+        selected_date = datetime.strptime(selected_date, '%Y-%m-%d')
+
+        # Filter results to include only those within the date range
+        filtered_results = []
+        for result in results:
+            text = result[0]
+            try:
+                # Extract and parse the "Data de início" date
+                start_date_str = text.split('Data de início: ')[1].split()[0]
+                start_date_text = datetime.strptime(start_date_str, '%d/%m/%Y')
+
+                # Extract and parse the "Conclusão Efetiva" date
+                end_date_str = text.split('Conclusão Efetiva: ')[1].split()[0]
+                end_date_text = datetime.strptime(end_date_str, '%d/%m/%Y')
+
+                # Check if the extracted dates fall within the specified range
+                if start_date_text <= selected_date <= end_date_text:
+                    filtered_results.append(text)
+            except (IndexError, ValueError):
+                continue
+        
+        return filtered_results
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return []
+    finally:
+        cursor.close()
+        connection.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
