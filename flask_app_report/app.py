@@ -42,23 +42,16 @@ def extract_dates(text):
     # Normalize text to remove accents
     normalized_text = unidecode.unidecode(text)
     
-    # Debug: Print normalized text to check what it looks like
-    print("Normalized text:", normalized_text)
-    
-    # Adjusted regex pattern for matching dates with optional spaces and case insensitivity
+    # Adjusted regex pattern for matching dates
     date_pattern = (
         r'Data\s+de\s+inicio\s*[:\s]*(\d{2}/\d{2}/\d{4})\s*Conclusão\s+Efetiva\s*[:\s]*(\d{2}/\d{2}/\d{4})'
     )
-    
-    # Debug: Print pattern used for search
-    print("Using pattern:", date_pattern)
     
     match = re.search(date_pattern, normalized_text, re.IGNORECASE)
     
     start_date, end_date = None, None
 
     if match:
-        # Extract dates using the refined pattern
         start_date_str, end_date_str = match.groups()
         
         try:
@@ -93,6 +86,13 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
             )
         ''')
         
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS uploaded_files (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                pdf_name VARCHAR(255) UNIQUE
+            )
+        ''')
+
         cursor.execute('SELECT COUNT(*) FROM pdf_text WHERE text_hash = %s', (text_hash,))
         if cursor.fetchone()[0] > 0:
             return False
@@ -101,6 +101,11 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
             INSERT INTO pdf_text (text, text_hash, d1, d2, pdf_name) 
             VALUES (%s, %s, %s, %s, %s)
         ''', (text, text_hash, start_date, end_date, pdf_name))
+        
+        cursor.execute('''
+            INSERT IGNORE INTO uploaded_files (pdf_name) 
+            VALUES (%s)
+        ''', (pdf_name,))
         
         connection.commit()
         return True
@@ -142,8 +147,20 @@ def index():
     selected_end_date = None
     pdf_name = None
 
-    # Get the list of uploaded PDF files
-    pdf_list = [f for f in os.listdir(app.config['UPLOAD_FOLDER']) if f.lower().endswith('.pdf')]
+    # Get the list of uploaded PDF files from the database
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        cursor.execute('SELECT pdf_name FROM uploaded_files')
+        pdf_list = cursor.fetchall()
+        pdf_list = [pdf[0] for pdf in pdf_list]
+
+        cursor.close()
+        connection.close()
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        pdf_list = []
 
     if request.method == 'POST':
         if 'file' in request.files:
@@ -167,10 +184,9 @@ def index():
                 else:
                     if save_to_mysql(extracted_text, text_hash, start_date, end_date, filename):
                         flash(f'File {filename} successfully uploaded and processed', 'success')
+                        pdf_name = filename
                     else:
                         flash(f'Este arquivo {filename} já está no banco de dados. Pode seguir com o relatório', 'error')
-                    pdf_name = filename
-
         elif 'start_date' in request.form and 'end_date' in request.form:
             selected_start_date_str = request.form.get('start_date')
             selected_end_date_str = request.form.get('end_date')
