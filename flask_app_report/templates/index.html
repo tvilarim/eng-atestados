@@ -8,10 +8,10 @@
 <body>
     <h1>Upload PDF and Search Reports</h1>
 
-    <!-- Form for uploading PDF -->
-    <h2>Upload a PDF</h2>
+    <!-- Form for uploading PDFs -->
+    <h2>Upload PDFs</h2>
     <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="file">
+        <input type="file" name="file" multiple>
         <input type="submit" value="Upload">
     </form>
 
@@ -27,14 +27,13 @@
         <p>No PDF files have been uploaded yet.</p>
     {% endif %}
 
-
     <!-- Form for searching reports -->
     <h2>Search Reports</h2>
     <form method="POST">
         <label for="start_date">Start Date:</label>
-        <input type="date" name="start_date" value="{{ selected_start_date }}">
+        <input type="date" name="start_date" value="{{ selected_start_date|default('') }}">
         <label for="end_date">End Date:</label>
-        <input type="date" name="end_date" value="{{ selected_end_date }}">
+        <input type="date" name="end_date" value="{{ selected_end_date|default('') }}">
         <input type="submit" value="Search">
     </form>
 
@@ -42,7 +41,7 @@
         <h3>Search Results</h3>
         <ul>
             {% for result in results %}
-                <li>{{ result.pdf_name }}: {{ result.text }}</li>
+                <li>{{ result.pdf_name }}: {{ result.text|truncate(100) }}...</li>
             {% endfor %}
         </ul>
     {% endif %}

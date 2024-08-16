@@ -145,7 +145,7 @@ def index():
     results = []
     selected_start_date = None
     selected_end_date = None
-    pdf_name = None
+    pdf_list = []
 
     # Get the list of uploaded PDF files from the database
     try:
@@ -160,33 +160,35 @@ def index():
         connection.close()
     except mysql.connector.Error as err:
         print(f"Error: {err}")
-        pdf_list = []
 
     if request.method == 'POST':
         if 'file' in request.files:
-            file = request.files['file']
-            
-            if file.filename == '':
-                flash('No selected file')
+            files = request.files.getlist('file')
+            if not files:
+                flash('No selected files')
                 return redirect(request.url)
             
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
+            for file in files:
+                if file.filename == '':
+                    continue
+                
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
 
-                extracted_text = process_pdf(file_path)
-                text_hash = calculate_hash(extracted_text)
+                    extracted_text = process_pdf(file_path)
+                    text_hash = calculate_hash(extracted_text)
 
-                start_date, end_date = extract_dates(extracted_text)
-                if not start_date and not end_date:
-                    flash(f'Could not extract dates from the PDF: {filename}. Saved without dates.', 'warning')
-                else:
-                    if save_to_mysql(extracted_text, text_hash, start_date, end_date, filename):
-                        flash(f'File {filename} successfully uploaded and processed', 'success')
-                        pdf_name = filename
+                    start_date, end_date = extract_dates(extracted_text)
+                    if not start_date and not end_date:
+                        flash(f'Could not extract dates from the PDF: {filename}. Saved without dates.', 'warning')
                     else:
-                        flash(f'Este arquivo {filename} já está no banco de dados. Pode seguir com o relatório', 'error')
+                        if save_to_mysql(extracted_text, text_hash, start_date, end_date, filename):
+                            flash(f'File {filename} successfully uploaded and processed', 'success')
+                        else:
+                            flash(f'Este arquivo {filename} já está no banco de dados. Pode seguir com o relatório', 'error')
+        
         elif 'start_date' in request.form and 'end_date' in request.form:
             selected_start_date_str = request.form.get('start_date')
             selected_end_date_str = request.form.get('end_date')
@@ -204,7 +206,7 @@ def index():
 
             results = search_reports(selected_start_date, selected_end_date)
 
-    return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date, pdf_name=pdf_name, pdf_list=pdf_list)
+    return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date, pdf_list=pdf_list)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

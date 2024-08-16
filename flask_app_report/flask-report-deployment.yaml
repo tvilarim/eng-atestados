@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.51" # bug fix - perform save to mysql even when date search is not susccessful
+        version: "v0.1.52" # Handle multiple files upload
     spec:
       containers:
       - name: flask-report
