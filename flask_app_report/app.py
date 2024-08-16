@@ -39,21 +39,16 @@ def process_pdf(pdf_path):
 
 def extract_dates(text):
     date_pattern = (
-        r'periodo de (\d{2}/\d{2}/\d{4}) a (\d{2}/\d{2}/\d{4})|'  # Original pattern
-        r'Data de inicio: (\d{2}/\d{2}/\d{4}) Conclusão Efetiva: (\d{2}/\d{2}/\d{4})'  # Or new pattern
+        r'Data de inicio: (\d{2}/\d{2}/\d{4}) Conclusão Efetiva: (\d{2}/\d{2}/\d{4})'  # New pattern
     )
 
     match = re.search(date_pattern, text)
     start_date, end_date = None, None
 
     if match:
-        # Extract matched groups, if they exist
         groups = match.groups()
-        # Handle the case where both patterns could match
-        if len(groups) == 4:
-            start_date_str, end_date_str = groups[0], groups[1]
-        elif len(groups) == 2:
-            start_date_str, end_date_str = groups[2], groups[3]
+        if len(groups) == 2:
+            start_date_str, end_date_str = groups
         else:
             flash("Error: Unexpected match format.", "error")
             return start_date, end_date
@@ -134,7 +129,6 @@ def search_reports(start_date, end_date):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    extracted_text = ""
     results = []
     selected_start_date = None
     selected_end_date = None
@@ -181,7 +175,7 @@ def index():
 
             results = search_reports(selected_start_date, selected_end_date)
 
-    return render_template('index.html', text=extracted_text, results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date)
+    return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
