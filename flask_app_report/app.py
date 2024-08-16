@@ -38,28 +38,49 @@ def process_pdf(pdf_path):
     combined_text = ' '.join(extracted_text)
     return combined_text
 
+import re
+from datetime import datetime
+
 def extract_dates(text):
     # Normalize text to remove accents
     normalized_text = unidecode.unidecode(text)
-    
-    # Robust regex pattern for matching dates near specific keywords
-    date_pattern = (
-        r'(?:Data\s+de\s+inicio\s*[:\s]*|Conclusao\s+Efetiva\s*[:\s]*)(\d{2}/\d{2}/\d{4})'
-    )
 
-    dates = re.findall(date_pattern, normalized_text, re.IGNORECASE)
+    # Patterns to match "Data de início:" and "Conclusão Efetiva:"
+    patterns = [
+        r'Data\s*de\s*inicio\s*[:\s]*(\d{2}/\d{2}/\d{4})',  # Matches "Data de início: 01/01/2023"
+        r'Conclusao\s*Efetiva\s*[:\s]*(\d{2}/\d{2}/\d{4})'  # Matches "Conclusão Efetiva: 31/12/2023"
+    ]
+
+    # Compiling all patterns for efficiency
+    regex = re.compile('|'.join(patterns), re.IGNORECASE)
+
+    matches = regex.findall(normalized_text)
     
     start_date, end_date = None, None
-
-    if len(dates) >= 2:
+    
+    # If matches are found, attempt to parse the dates
+    if matches:
         try:
-            start_date = datetime.strptime(dates[0], '%d/%m/%Y').strftime('%Y-%m-%d')
-            end_date = datetime.strptime(dates[1], '%d/%m/%Y').strftime('%Y-%m-%d')
+            if len(matches) > 0:
+                start_date = datetime.strptime(matches[0], '%d/%m/%Y').strftime('%Y-%m-%d')
+            if len(matches) > 1:
+                end_date = datetime.strptime(matches[1], '%d/%m/%Y').strftime('%Y-%m-%d')
         except ValueError as e:
             print(f"Error: Date format in the text is incorrect. Exception: {e}")
     else:
-        # Provide default values if dates are not found
-        print("Could not find both start and end dates in the text.")
+        # If the primary pattern doesn't work, try finding any general date patterns in the vicinity
+        generic_date_pattern = r'\b(\d{2}/\d{2}/\d{4})\b'
+        date_matches = re.findall(generic_date_pattern, normalized_text)
+
+        if len(date_matches) >= 2:
+            try:
+                start_date = datetime.strptime(date_matches[0], '%d/%m/%Y').strftime('%Y-%m-%d')
+                end_date = datetime.strptime(date_matches[1], '%d/%m/%Y').strftime('%Y-%m-%d')
+            except ValueError as e:
+                print(f"Error: Date format in the text is incorrect. Exception: {e}")
+
+    if not start_date and not end_date:
+        print("Could not find the date pattern in the text, saving without dates.")
     
     return start_date, end_date
 
