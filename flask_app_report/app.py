@@ -227,6 +227,9 @@ def index():
 
             results = search_reports(selected_start_date, selected_end_date)
 
+            if not results:
+                flash('No reports found for the selected date range.', 'info')
+
     return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date, pdf_list=pdf_list)
 
 if __name__ == '__main__':

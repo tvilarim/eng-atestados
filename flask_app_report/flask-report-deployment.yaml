@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.56" # remove auto reload
+        version: "v1.0.0" # YAHHH Date range search is working!!! Congrats TIAGO
     spec:
       containers:
       - name: flask-report
