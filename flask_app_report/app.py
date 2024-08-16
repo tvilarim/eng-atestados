@@ -60,7 +60,7 @@ def extract_dates(text):
             flash("Error: Date format in the text is incorrect.", "error")
 
     if not start_date or not end_date:
-        flash("Error: Could not find the required dates in the text.", "error")
+        flash("Error: Could not find the required dates in the text. Extracted text: " + text, "error")
     
     return start_date, end_date
 
