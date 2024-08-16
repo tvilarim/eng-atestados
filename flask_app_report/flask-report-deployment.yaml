@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v1.0.0" # YAHHH Date range search is working!!! Congrats TIAGO
+        version: "v1.0.1" # Fix multiple upload files error
     spec:
       containers:
       - name: flask-report

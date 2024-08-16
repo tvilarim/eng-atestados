@@ -62,9 +62,9 @@ def extract_dates(text):
     if matches:
         try:
             if len(matches) > 0:
-                start_date = datetime.strptime(matches[0], '%d/%m/%Y').strftime('%Y-%m-%d')
+                start_date = datetime.strptime(matches[0][0], '%d/%m/%Y').strftime('%Y-%m-%d')
             if len(matches) > 1:
-                end_date = datetime.strptime(matches[1], '%d/%m/%Y').strftime('%Y-%m-%d')
+                end_date = datetime.strptime(matches[1][0], '%d/%m/%Y').strftime('%Y-%m-%d')
         except ValueError as e:
             print(f"Error: Date format in the text is incorrect. Exception: {e}")
     else:
