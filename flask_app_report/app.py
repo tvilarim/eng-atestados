@@ -8,6 +8,7 @@ import pytesseract
 from pytesseract import Output
 import hashlib
 from datetime import datetime
+import unicodedata
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/app/uploads'
@@ -37,12 +38,21 @@ def process_pdf(pdf_path):
     combined_text = ' '.join(extracted_text)
     return combined_text
 
+def remove_accents(text):
+    """Remove accents from characters in the text."""
+    normalized_text = unicodedata.normalize('NFKD', text)
+    return ''.join(char for char in normalized_text if not unicodedata.combining(char))
+
 def extract_dates(text):
+    # Normalize text to remove accents
+    normalized_text = remove_accents(text)
+    
+    # Regular expression pattern with case-insensitivity
     date_pattern = (
         r'Data de inicio: (\d{2}/\d{2}/\d{4}) Conclusão Efetiva: (\d{2}/\d{2}/\d{4})'  # New pattern
     )
-
-    match = re.search(date_pattern, text)
+    
+    match = re.search(date_pattern, normalized_text, re.IGNORECASE)
     start_date, end_date = None, None
 
     if match:
