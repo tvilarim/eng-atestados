@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Reports</title>
+    <title>Upload and Search Reports</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,11 +17,17 @@
             margin: 0 auto;
             padding: 20px;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #007bff;
+        }
+        h1 {
             font-size: 24px;
-            margin-bottom: 20px; /* Add spacing below the title */
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
         }
         .alert {
             padding: 10px;
@@ -46,18 +52,19 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             font-size: 16px;
+            margin-bottom: 20px;
         }
         label {
             display: block;
             margin-bottom: 10px;
             font-size: 16px;
         }
-        input[type="date"], button {
+        input[type="file"], input[type="date"], button {
             margin-top: 10px;
-            margin-bottom: 20px; /* Add spacing between date inputs */
+            margin-bottom: 20px;
             font-size: 16px;
-            width: 100%; /* Ensure full-width for inputs */
-            padding: 10px; /* Add padding for better visibility */
+            width: 100%;
+            padding: 10px;
         }
         button {
             background-color: #007bff;
@@ -66,17 +73,13 @@
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            width: 100%; /* Ensure full-width for the button */
+            width: 100%;
         }
         button:hover {
             background-color: #0056b3;
         }
-        .results {
+        .results, .extracted-text {
             margin-top: 20px;
-        }
-        .results h2 {
-            color: #007bff;
-            font-size: 20px;
         }
         .results ul {
             list-style-type: none;
@@ -87,23 +90,19 @@
             font-size: 16px;
         }
         .extracted-text {
-            margin-top: 20px;
             padding: 20px;
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .extracted-text h2 {
-            color: #007bff;
-        }
         .extracted-text pre {
-            white-space: pre-wrap; /* Allows long text to wrap */
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Search Reports</h1>
+        <h1>Upload and Search Reports</h1>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -112,6 +111,21 @@
             {% endif %}
         {% endwith %}
         
+        <!-- Upload PDF Form -->
+        <form method="post" enctype="multipart/form-data">
+            <label for="file">Select PDF file:</label>
+            <input type="file" id="file" name="file" accept=".pdf" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        {% if text %}
+            <div class="extracted-text">
+                <h2>Extracted Text</h2>
+                <pre>{{ text }}</pre>
+            </div>
+        {% endif %}
+        
+        <!-- Search Reports Form -->
         <form method="POST" action="{{ url_for('search') }}">
             <label for="start_date">Select Start Date:</label>
             <input type="date" id="start_date" name="start_date" required>
@@ -120,15 +134,8 @@
             <input type="date" id="end_date" name="end_date" required>
         
             <button type="submit">Search</button>
-        </form>        
-        
-        {% if extracted_text %}
-            <div class="extracted-text">
-                <h2>Extracted Text</h2>
-                <pre>{{ extracted_text }}</pre>
-            </div>
-        {% endif %}
-        
+        </form>
+
         {% if results %}
             <div class="results">
                 <h2>Search Results:</h2>

@@ -76,6 +76,9 @@ def calculate_hash(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
 def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
+    if not start_date or not end_date:
+        return False  # Do not save if dates are missing
+    
     try:
         # Connect to the MySQL database
         connection = mysql.connector.connect(**db_config)
@@ -170,6 +173,7 @@ def upload_file():
             # Check if the dates were successfully extracted
             if not start_date or not end_date:
                 flash('Could not extract required dates from the PDF.', 'error')
+                return render_template('upload.html', text=extracted_text)
             
             # Check if the content already exists in the database
             if save_to_mysql(extracted_text, text_hash, start_date, end_date, filename):
