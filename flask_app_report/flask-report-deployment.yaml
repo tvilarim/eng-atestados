@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.38" # app.py adjusts; index.html unifying all html
+        version: "v0.1.39" # app.py adjusts to get the period dates by another string in pdf
     spec:
       containers:
       - name: flask-report

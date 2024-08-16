@@ -38,7 +38,12 @@ def process_pdf(pdf_path):
     return combined_text
 
 def extract_dates(text):
-    date_pattern = r'periodo de (\d{2}/\d{2}/\d{4}) a (\d{2}/\d{2}/\d{4})'
+
+    date_pattern = (
+        r'periodo de (\d{2}/\d{2}/\d{4}) a (\d{2}/\d{2}/\d{4})|'  # Original pattern
+        r'Data de inicio: (\d{2}/\d{2}/\d{4}) Conclusão Efetiva: (\d{2}/\d{2}/\d{4})'  # Or new pattern
+    )
+
     match = re.search(date_pattern, text)
     start_date, end_date = None, None
 
