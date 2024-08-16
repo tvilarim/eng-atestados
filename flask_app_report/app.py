@@ -33,7 +33,7 @@ def process_pdf(pdf_path):
     images = convert_from_path(pdf_path)
     extracted_text = []
     for image in images:
-        text = pytesseract.image_to_string(image, output_type=Output.DICT)
+        text = pytesseract.image_to_string(image, output_type=pytesseract.Output.DICT)
         extracted_text.append(text['text'])
     combined_text = ' '.join(extracted_text)
     return combined_text
@@ -57,13 +57,13 @@ def extract_dates(text):
         try:
             start_date = datetime.strptime(start_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
             end_date = datetime.strptime(end_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
-        except ValueError:
-            flash("Error: Date format in the text is incorrect.", "error")
+        except ValueError as e:
+            print(f"Error: Date format in the text is incorrect. Exception: {e}")
     else:
         # Provide default values if dates are not found
         start_date = None
         end_date = None
-        flash("Could not find the date pattern in the text, saving without dates.", "warning")
+        print("Could not find the date pattern in the text, saving without dates.")
     
     return start_date, end_date
 
