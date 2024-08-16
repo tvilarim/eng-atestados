@@ -15,10 +15,17 @@
         <input type="submit" value="Upload">
     </form>
 
-    <!-- {% if text %}
-        <h3>Extracted Text</h3>
-        <p>{{ text }}</p>
-    {% endif %} -->
+    <!-- List of all uploaded PDFs -->
+    <h2>All PDF Files Uploaded</h2>
+    {% if pdf_list %}
+        <ul>
+            {% for pdf in pdf_list %}
+                <li>{{ pdf }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No PDF files uploaded yet.</p>
+    {% endif %}
 
     <!-- Form for searching reports -->
     <h2>Search Reports</h2>

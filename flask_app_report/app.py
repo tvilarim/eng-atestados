@@ -148,6 +148,9 @@ def index():
     selected_end_date = None
     pdf_name = None
 
+    # Get the list of uploaded PDF files
+    pdf_list = [f for f in os.listdir(app.config['UPLOAD_FOLDER']) if f.lower().endswith('.pdf')]
+
     if request.method == 'POST':
         if 'file' in request.files:
             file = request.files['file']
@@ -191,7 +194,7 @@ def index():
 
             results = search_reports(selected_start_date, selected_end_date)
 
-    return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date, pdf_name=pdf_name)
+    return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date, pdf_name=pdf_name, pdf_list=pdf_list)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
