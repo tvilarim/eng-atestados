@@ -53,6 +53,14 @@
                     <li class="{{ category }}">{{ message }}</li>
                 {% endfor %}
             </ul>
+            <!-- JavaScript to reload the page when a flash message is displayed -->
+            <script>
+                window.addEventListener('load', function() {
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000); // Delay to allow the user to see the flash message before the page reloads
+                });
+            </script>
         {% endif %}
     {% endwith %}
 </body>

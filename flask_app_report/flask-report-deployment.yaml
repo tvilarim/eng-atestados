@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.54" # still testing search date ways
+        version: "v0.1.55" # auto reload http when flash message
     spec:
       containers:
       - name: flask-report
