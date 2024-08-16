@@ -21,6 +21,7 @@
             text-align: center;
             color: #007bff;
             font-size: 24px;
+            margin-bottom: 20px; /* Add spacing below the title */
         }
         .alert {
             padding: 10px;
@@ -53,7 +54,10 @@
         }
         input[type="date"], button {
             margin-top: 10px;
+            margin-bottom: 20px; /* Add spacing between date inputs */
             font-size: 16px;
+            width: 100%; /* Ensure full-width for inputs */
+            padding: 10px; /* Add padding for better visibility */
         }
         button {
             background-color: #007bff;
@@ -62,6 +66,7 @@
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
+            width: 100%; /* Ensure full-width for the button */
         }
         button:hover {
             background-color: #0056b3;
@@ -136,8 +141,8 @@
                 </ul>
             </div>
         {% else %}
-            {% if selected_date %}
-                <p>No results found for {{ selected_date.strftime('%d/%m/%Y') }}.</p>
+            {% if selected_start_date and selected_end_date %}
+                <p>No results found for the selected date range.</p>
             {% endif %}
         {% endif %}
     </div>
