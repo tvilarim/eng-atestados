@@ -221,6 +221,10 @@ def index():
                 flash('Invalid date format. Please use the calendar to select a date.', 'error')
                 return redirect(url_for('index'))
 
+            if selected_end_date < selected_start_date:
+                flash('The end date must be after the start date.', 'error')
+                return redirect(url_for('index'))
+
             results = search_reports(selected_start_date, selected_end_date)
 
     return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date, pdf_list=pdf_list)
