@@ -3,155 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload and Search Reports</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1, h2 {
-            text-align: center;
-            color: #007bff;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        h2 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        .alert {
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid transparent;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        .alert.success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-        .alert.error {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-        form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        input[type="file"], input[type="date"], button {
-            margin-top: 10px;
-            margin-bottom: 20px;
-            font-size: 16px;
-            width: 100%;
-            padding: 10px;
-        }
-        button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .results, .extracted-text {
-            margin-top: 20px;
-        }
-        .results ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .results li {
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        .extracted-text {
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .extracted-text pre {
-            white-space: pre-wrap;
-        }
-    </style>
+    <title>File Upload and Search</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Upload and Search Reports</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
+    <h1>Upload PDF and Search Reports</h1>
+
+    <!-- Form for uploading PDF -->
+    <h2>Upload a PDF</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+
+    {% if text %}
+        <h3>Extracted Text</h3>
+        <p>{{ text }}</p>
+    {% endif %}
+
+    <!-- Form for searching reports -->
+    <h2>Search Reports</h2>
+    <form method="POST">
+        <label for="start_date">Start Date:</label>
+        <input type="date" name="start_date" value="{{ selected_start_date }}">
+        <label for="end_date">End Date:</label>
+        <input type="date" name="end_date" value="{{ selected_end_date }}">
+        <input type="submit" value="Search">
+    </form>
+
+    {% if results %}
+        <h3>Search Results</h3>
+        <ul>
+            {% for result in results %}
+                <li>{{ result.pdf_name }}: {{ result.text }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            <ul class="flashes">
                 {% for category, message in messages %}
-                    <div class="alert {{ category }}">{{ message }}</div>
+                    <li class="{{ category }}">{{ message }}</li>
                 {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <!-- Upload PDF Form -->
-        <form method="post" enctype="multipart/form-data">
-            <label for="file">Select PDF file:</label>
-            <input type="file" id="file" name="file" accept=".pdf" required>
-            <button type="submit">Upload</button>
-        </form>
-
-        {% if text %}
-            <div class="extracted-text">
-                <h2>Extracted Text</h2>
-                <pre>{{ text }}</pre>
-            </div>
+            </ul>
         {% endif %}
-        
-        <!-- Search Reports Form -->
-        <form method="POST" action="{{ url_for('search') }}">
-            <label for="start_date">Select Start Date:</label>
-            <input type="date" id="start_date" name="start_date" required>
-        
-            <label for="end_date">Select End Date:</label>
-            <input type="date" id="end_date" name="end_date" required>
-        
-            <button type="submit">Search</button>
-        </form>
-
-        {% if results %}
-            <div class="results">
-                <h2>Search Results:</h2>
-                <ul>
-                    {% for result in results %}
-                        <li>
-                            <strong>Text:</strong> <p>{{ result }}</p>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% else %}
-            {% if selected_start_date and selected_end_date %}
-                <p>No results found for the selected date range.</p>
-            {% endif %}
-        {% endif %}
-    </div>
+    {% endwith %}
 </body>
 </html>
