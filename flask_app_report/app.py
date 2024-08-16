@@ -42,36 +42,30 @@ def extract_dates(text):
     # Normalize text to remove accents
     normalized_text = unidecode.unidecode(text)
     
-    # Adjust the regex pattern to account for optional spaces and case insensitivity
+    # Debug: Print normalized text to check what it looks like
+    print("Normalized text:", normalized_text)
+    
+    # Adjusted regex pattern for matching dates with optional spaces and case insensitivity
     date_pattern = (
-        r'Data\s+de\s+inicio\s*[:\s]+\d{2}/\d{2}/\d{4}\s*Conclusão\s+Efetiva\s*[:\s]+\d{2}/\d{2}/\d{4}'
+        r'Data\s+de\s+inicio\s*[:\s]*(\d{2}/\d{2}/\d{4})\s*Conclusão\s+Efetiva\s*[:\s]*(\d{2}/\d{2}/\d{4})'
     )
     
+    # Debug: Print pattern used for search
+    print("Using pattern:", date_pattern)
+    
     match = re.search(date_pattern, normalized_text, re.IGNORECASE)
+    
     start_date, end_date = None, None
 
     if match:
-        # Extract dates using a more precise pattern
-        date_extraction_pattern = (
-            r'Data\s+de\s+inicio\s*[:\s]+(\d{2}/\d{2}/\d{4})\s*Conclusão\s+Efetiva\s*[:\s]+(\d{2}/\d{2}/\d{4})'
-        )
-        date_match = re.search(date_extraction_pattern, normalized_text, re.IGNORECASE)
-
-        if date_match:
-            groups = date_match.groups()
-            if len(groups) == 2:
-                start_date_str, end_date_str = groups
-            else:
-                flash("Error: Unexpected match format.", "error")
-                return start_date, end_date
-
-            try:
-                start_date = datetime.strptime(start_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
-                end_date = datetime.strptime(end_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
-            except ValueError:
-                flash("Error: Date format in the text is incorrect.", "error")
-        else:
-            flash("Error: Could not find the required dates in the text.", "error")
+        # Extract dates using the refined pattern
+        start_date_str, end_date_str = match.groups()
+        
+        try:
+            start_date = datetime.strptime(start_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
+        except ValueError:
+            flash("Error: Date format in the text is incorrect.", "error")
     else:
         flash("Error: Could not find the date pattern in the text.", "error")
     

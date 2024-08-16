@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.48" # List of uploaded files
+        version: "v0.1.49" # Regexp adjust
     spec:
       containers:
       - name: flask-report
