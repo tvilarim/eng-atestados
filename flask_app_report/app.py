@@ -60,7 +60,10 @@ def extract_dates(text):
         except ValueError:
             flash("Error: Date format in the text is incorrect.", "error")
     else:
-        flash("Error: Could not find the date pattern in the text.", "error")
+        # Provide default values if dates are not found
+        start_date = None
+        end_date = None
+        flash("Could not find the date pattern in the text, saving without dates.", "warning")
     
     return start_date, end_date
 
@@ -68,9 +71,6 @@ def calculate_hash(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
 def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
-    if not start_date or not end_date:
-        return False
-    
     try:
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
@@ -179,8 +179,8 @@ def index():
                 text_hash = calculate_hash(extracted_text)
 
                 start_date, end_date = extract_dates(extracted_text)
-                if not start_date or not end_date:
-                    flash(f'Could not extract required dates from the PDF: {filename}', 'error')
+                if not start_date and not end_date:
+                    flash(f'Could not extract dates from the PDF: {filename}. Saved without dates.', 'warning')
                 else:
                     if save_to_mysql(extracted_text, text_hash, start_date, end_date, filename):
                         flash(f'File {filename} successfully uploaded and processed', 'success')
