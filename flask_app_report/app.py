@@ -38,7 +38,6 @@ def process_pdf(pdf_path):
     return combined_text
 
 def extract_dates(text):
-
     date_pattern = (
         r'periodo de (\d{2}/\d{2}/\d{4}) a (\d{2}/\d{2}/\d{4})|'  # Original pattern
         r'Data de inicio: (\d{2}/\d{2}/\d{4}) Conclusão Efetiva: (\d{2}/\d{2}/\d{4})'  # Or new pattern
@@ -48,7 +47,17 @@ def extract_dates(text):
     start_date, end_date = None, None
 
     if match:
-        start_date_str, end_date_str = match.groups()
+        # Extract matched groups, if they exist
+        groups = match.groups()
+        # Handle the case where both patterns could match
+        if len(groups) == 4:
+            start_date_str, end_date_str = groups[0], groups[1]
+        elif len(groups) == 2:
+            start_date_str, end_date_str = groups[2], groups[3]
+        else:
+            flash("Error: Unexpected match format.", "error")
+            return start_date, end_date
+
         try:
             start_date = datetime.strptime(start_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
             end_date = datetime.strptime(end_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
