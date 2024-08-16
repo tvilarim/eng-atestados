@@ -60,7 +60,7 @@ def extract_dates(text):
             flash("Error: Date format in the text is incorrect.", "error")
 
     if not start_date or not end_date:
-        flash("Error: Could not find the required dates in the text. Extracted text: " + text, "error")
+        flash("Error: Could not find the required dates in the text.", "error")
     
     return start_date, end_date
 
@@ -120,7 +120,8 @@ def search_reports(start_date, end_date):
         cursor.close()
         connection.close()
 
-        filtered_results = [{'text': result[0], 'pdf_name': result[1]} for result in results]
+        # Return only PDF names and short summaries or indicate more info available
+        filtered_results = [{'pdf_name': result[1]} for result in results]
 
         return filtered_results
     except mysql.connector.Error as err:
