@@ -119,13 +119,13 @@ def search_reports(start_date, end_date):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Prepare the query to search for intersection with the date range
+        # Prepare the query to search for matches within the date range
         query = '''
             SELECT text, pdf_name
             FROM pdf_text
             WHERE (d1 <= %s AND d2 >= %s) OR (d1 <= %s AND d2 >= %s)
         '''
-        cursor.execute(query, (end_date, start_date, start_date, end_date))
+        cursor.execute(query, (start_date, end_date, end_date, start_date))
 
         results = cursor.fetchall()
 
@@ -184,28 +184,29 @@ def upload_file():
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     results = []
-    start_date = None
-    end_date = None
+    selected_start_date = None
+    selected_end_date = None
+    
     if request.method == 'POST':
-        start_date_str = request.form.get('start_date')
-        end_date_str = request.form.get('end_date')
+        selected_start_date_str = request.form.get('start_date')
+        selected_end_date_str = request.form.get('end_date')
         
-        if not start_date_str or not end_date_str:
+        if not selected_start_date_str or not selected_end_date_str:
             flash('Please select both start and end dates.', 'error')
             return redirect(url_for('search'))
 
         try:
             # Convert the dates from 'yyyy-mm-dd' to datetime objects
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            selected_start_date = datetime.strptime(selected_start_date_str, '%Y-%m-%d')
+            selected_end_date = datetime.strptime(selected_end_date_str, '%Y-%m-%d')
         except ValueError:
-            flash('Invalid date format. Please use the calendar to select dates.', 'error')
+            flash('Invalid date format. Please use the calendar to select a date.', 'error')
             return redirect(url_for('search'))
 
-        # Perform the search and get results
-        results = search_reports(start_date, end_date)
+        # Perform the search and get results based on date intersection
+        results = search_reports(selected_start_date, selected_end_date)
     
-    return render_template('search.html', results=results, start_date=start_date, end_date=end_date)
+    return render_template('search.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
