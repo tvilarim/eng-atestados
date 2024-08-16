@@ -42,28 +42,24 @@ def extract_dates(text):
     # Normalize text to remove accents
     normalized_text = unidecode.unidecode(text)
     
-    # Adjusted regex pattern for matching dates
+    # Robust regex pattern for matching dates near specific keywords
     date_pattern = (
-        r'Data\s+de\s+inicio\s*[:\s]*(\d{2}/\d{2}/\d{4})\s*Conclusão\s+Efetiva\s*[:\s]*(\d{2}/\d{2}/\d{4})'
+        r'(?:Data\s+de\s+inicio\s*[:\s]*|Conclusao\s+Efetiva\s*[:\s]*)(\d{2}/\d{2}/\d{4})'
     )
-    
-    match = re.search(date_pattern, normalized_text, re.IGNORECASE)
+
+    dates = re.findall(date_pattern, normalized_text, re.IGNORECASE)
     
     start_date, end_date = None, None
 
-    if match:
-        start_date_str, end_date_str = match.groups()
-        
+    if len(dates) >= 2:
         try:
-            start_date = datetime.strptime(start_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
-            end_date = datetime.strptime(end_date_str, '%d/%m/%Y').strftime('%Y-%m-%d')
+            start_date = datetime.strptime(dates[0], '%d/%m/%Y').strftime('%Y-%m-%d')
+            end_date = datetime.strptime(dates[1], '%d/%m/%Y').strftime('%Y-%m-%d')
         except ValueError as e:
             print(f"Error: Date format in the text is incorrect. Exception: {e}")
     else:
         # Provide default values if dates are not found
-        start_date = None
-        end_date = None
-        print("Could not find the date pattern in the text, saving without dates.")
+        print("Could not find both start and end dates in the text.")
     
     return start_date, end_date
 
@@ -85,7 +81,7 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
                 pdf_name VARCHAR(255)
             )
         ''')
-        
+
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS uploaded_files (
                 id INT AUTO_INCREMENT PRIMARY KEY,

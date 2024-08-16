@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.51" # regexp new try
+        version: "v0.1.52" # new search date try
     spec:
       containers:
       - name: flask-report
