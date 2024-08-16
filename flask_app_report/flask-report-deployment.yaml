@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v1.0.1" # Fix multiple upload files error
+        version: "v1.0.2" # OK OK OK OK - Busca por data finalmente OK.
     spec:
       containers:
       - name: flask-report
