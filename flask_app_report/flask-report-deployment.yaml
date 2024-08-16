@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.33" # MILESTONE testing the search with date period intersection
+        version: "v0.1.33" # Testing the search with date period intersection
     spec:
       containers:
       - name: flask-report
