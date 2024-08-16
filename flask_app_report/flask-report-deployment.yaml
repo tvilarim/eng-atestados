@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.55" # auto reload http when flash message
+        version: "v0.1.56" # remove auto reload
     spec:
       containers:
       - name: flask-report
