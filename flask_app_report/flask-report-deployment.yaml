@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.45" # app.py date extraction tests
+        version: "v0.1.46" # app.py date extraction tests
     spec:
       containers:
       - name: flask-report
