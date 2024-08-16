@@ -133,6 +133,7 @@ def index():
     results = []
     selected_start_date = None
     selected_end_date = None
+    pdf_name = None
 
     if request.method == 'POST':
         if 'file' in request.files:
@@ -152,12 +153,13 @@ def index():
 
                 start_date, end_date = extract_dates(extracted_text)
                 if not start_date or not end_date:
-                    flash('Could not extract required dates from the PDF.', 'error')
+                    flash(f'Could not extract required dates from the PDF: {filename}', 'error')
                 else:
                     if save_to_mysql(extracted_text, text_hash, start_date, end_date, filename):
-                        flash('File successfully uploaded and processed', 'success')
+                        flash(f'File {filename} successfully uploaded and processed', 'success')
                     else:
-                        flash('Este arquivo já está no banco de dados. Pode seguir com o relatório', 'error')
+                        flash(f'Este arquivo {filename} já está no banco de dados. Pode seguir com o relatório', 'error')
+                    pdf_name = filename
 
         elif 'start_date' in request.form and 'end_date' in request.form:
             selected_start_date_str = request.form.get('start_date')
@@ -176,7 +178,7 @@ def index():
 
             results = search_reports(selected_start_date, selected_end_date)
 
-    return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date)
+    return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date, pdf_name=pdf_name)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
