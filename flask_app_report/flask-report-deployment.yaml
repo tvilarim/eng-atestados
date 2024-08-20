@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v1.0.4" # Excluindo dir antigo obsoleto
+        version: "v1.0.5" # Deletando pdf_to_csv.py - Desncessário para continuidade do projeto
     spec:
       containers:
       - name: flask-report
