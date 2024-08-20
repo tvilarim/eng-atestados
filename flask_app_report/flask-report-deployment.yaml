@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v1.0.2" # OK OK OK OK - Busca por data finalmente OK.
+        version: "v1.0.2" # Último commit deste branch para realizar o pull no main
     spec:
       containers:
       - name: flask-report
