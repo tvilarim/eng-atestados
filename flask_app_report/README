@@ -5,17 +5,11 @@ To deploy run in order:
 docker login
 docker tag flask-report:latest tvilarim/flask-report:latest
 
-
-docker build -t tvilarim/flask-report:latest .
 kubectl set image deployment/flask-report flask-report=flask-report:latest
 
+docker build -t tvilarim/flask-report:latest .
 docker push tvilarim/flask-report:latest
 kubectl apply -f flask-report-deployment.yaml
 
 curl -I http://192.168.49.2:30000
-
-
-
-
-
 
