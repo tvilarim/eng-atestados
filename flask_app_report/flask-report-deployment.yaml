@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v1.0.3" # Testes com o código comentado em português
+        version: "v1.0.4" # Excluindo dir antigo obsoleto
     spec:
       containers:
       - name: flask-report
