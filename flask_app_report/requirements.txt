@@ -1,5 +1,5 @@
-poppler-utils
 pdf2image
 pytesseract
 mysql-connector-python
+unidecode
 flask

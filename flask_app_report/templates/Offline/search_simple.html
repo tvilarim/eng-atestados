@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Date Pickers</title>
+</head>
+<body>
+    <form method="POST" action="{{ url_for('search') }}">
+        <label for="start_date">Select Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required>
+        
+        <label for="end_date">Select End Date:</label>
+        <input type="date" id="end_date" name="end_date" required>
+        
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>

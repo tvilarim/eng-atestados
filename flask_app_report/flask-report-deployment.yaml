@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-report
+  labels:
+    app: flask-report
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask-report
+  template:
+    metadata:
+      labels:
+        app: flask-report
+        version: "v1.0.2" # Último commit deste branch para realizar o pull no main
+    spec:
+      containers:
+      - name: flask-report
+        image: tvilarim/flask-report:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: FLASK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flask-report-secret
+              key: FLASK_SECRET_KEY
+        - name: MYSQL_HOST
+          value: mysql-service
+        - name: MYSQL_USER
+          value: root
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: flask-report-secret
+              key: MYSQL_PASSWORD
+        - name: MYSQL_DATABASE
+          value: atestados
+        volumeMounts:
+        - name: uploads
+          mountPath: /app/uploads
+      volumes:
+      - name: uploads
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-report
+spec:
+  type: NodePort  # Changed from LoadBalancer to NodePort
+  selector:
+    app: flask-report
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 30000  # Specify the NodePort (can be any port between 30000-32767)
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flask-report-ingress
+spec:
+  rules:
+  - host: flask-report.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: flask-report
+            port:
+              number: 80
