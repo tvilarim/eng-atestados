@@ -5,7 +5,6 @@ from werkzeug.utils import secure_filename
 import mysql.connector
 from pdf2image import convert_from_path
 import pytesseract
-from pytesseract import Output
 import hashlib
 from datetime import datetime
 import unidecode
@@ -36,15 +35,14 @@ def process_pdf(pdf_path):
     images = convert_from_path(pdf_path)  # Converte as páginas do PDF em imagens
     extracted_text = []
     for image in images:
-        text = pytesseract.image_to_string(image, output_type=pytesseract.Output.DICT)  # Extrai o texto de cada imagem usando OCR
-        extracted_text.append(text['text'])  # Adiciona o texto extraído a uma lista
+        text = pytesseract.image_to_string(image)  # Extrai o texto de cada imagem usando OCR
+        extracted_text.append(text)  # Adiciona o texto extraído a uma lista
     combined_text = ' '.join(extracted_text)  # Combina todo o texto extraído em uma única string
     return combined_text
 
 # Função para extrair datas específicas do texto
 def extract_dates(text):
-    # Normaliza o texto para remover acentos
-    normalized_text = unidecode.unidecode(text)
+    normalized_text = unidecode.unidecode(text)  # Normaliza o texto para remover acentos
 
     # Padrões para corresponder "Data de início:" e "Conclusão Efetiva:"
     patterns = [
@@ -118,7 +116,7 @@ def extract_and_save_service_table(text, pdf_name):
             service_section = normalized_text[service_section_match.end():]
 
             # Expressão regular para capturar linhas de tabela com "Item", "Serviço", "Unidade", "Quantidade"
-            table_pattern = r'(\d+\s*\d*\s*\d*)\s+([^\d\s]+(?:\s+[^\d\s]+)*)\s+([A-Za-z]+)\s+([\d,.]+)'
+            table_pattern = r'(\d{2}\s\d{2}\s\d{2})\s+([^\d\s]+(?:\s+[^\d\s]+)*)\s+([A-Za-z]+)\s+([\d,.]+)'
             matches = re.findall(table_pattern, service_section)
 
             # Insere os dados extraídos na tabela service_table
