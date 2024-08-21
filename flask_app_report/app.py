@@ -89,35 +89,38 @@ def extract_dates(text):
 def calculate_hash(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
-# Função para extrair palavras com números à direita, que comecem com Serviços e salvar no banco de dados
-def extract_and_save_words_with_numbers(text, pdf_name):
+# Função para extrair e salvar os dados da tabela de serviços
+def extract_and_save_service_table(text, pdf_name):
     try:
         connection = mysql.connector.connect(**db_config)  # Conecta ao banco de dados
         cursor = connection.cursor()
 
         # Criação da tabela se não existir
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS word_number_pairs (
+            CREATE TABLE IF NOT EXISTS service_table (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                word VARCHAR(255),
-                number VARCHAR(50),
+                item VARCHAR(50),
+                service VARCHAR(255),
+                unit VARCHAR(50),
+                quantity VARCHAR(50),
                 pdf_name VARCHAR(255)
             )
         ''')
 
-        # Expressão regular para capturar a palavra "Serviços" seguida de palavras e números
-        # Considera variações como "Serviço", "serviços", etc.
-        pattern = r'\b[Ss]ervi[cç]os?\b.*?\b(\w+)[\s]*[=:\-]?\s*(\d+(\.\d+)?)\b'
-        matches = re.findall(pattern, text, re.DOTALL)
+        # Expressão regular para capturar linhas de tabela com "Item", "Serviços", "Unid" e "QTDE"
+        pattern = r'(\d+\s*\d*\s*\d*)\s+([^\d\s]+(?:\s+[^\d\s]+)*)\s+([A-Za-z]+)\s+([\d,.]+)'
+        matches = re.findall(pattern, text)
 
-        # Insere os dados extraídos na tabela word_number_pairs
+        # Insere os dados extraídos na tabela service_table
         for match in matches:
-            word = match[0]
-            number = match[1]
+            item = match[0]
+            service = match[1]
+            unit = match[2]
+            quantity = match[3]
             cursor.execute('''
-                INSERT INTO word_number_pairs (word, number, pdf_name) 
-                VALUES (%s, %s, %s)
-            ''', (word, number, pdf_name))
+                INSERT INTO service_table (item, service, unit, quantity, pdf_name) 
+                VALUES (%s, %s, %s, %s, %s)
+            ''', (item, service, unit, quantity, pdf_name))
         
         connection.commit()  # Confirma a transação
     except mysql.connector.Error as err:
@@ -170,8 +173,8 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
         
         connection.commit()  # Confirma a transação
 
-        # Extrai e salva as palavras com números associadas começando com "Serviços"
-        extract_and_save_words_with_numbers(text, pdf_name)
+        # Extrai e salva a tabela de serviços
+        extract_and_save_service_table(text, pdf_name)
 
         return True
     except mysql.connector.Error as err:
@@ -180,6 +183,28 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
     finally:
         cursor.close()  # Fecha o cursor
         connection.close()  # Fecha a conexão com o banco de dados
+
+# Função para buscar a tabela de serviços no banco de dados
+def fetch_service_table():
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        # Consulta para buscar todos os registros da tabela de serviços
+        query = '''
+            SELECT item, service, unit, quantity, pdf_name
+            FROM service_table
+        '''
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        return results
+    except mysql.connector.Error as err:
+        print(f"Erro: {err}")
+        return []
 
 # Função para buscar relatórios no banco de dados com base em um intervalo de datas
 def search_reports(start_date, end_date):
@@ -207,28 +232,6 @@ def search_reports(start_date, end_date):
         print(f"Erro: {err}")
         return []
 
-# Função para buscar os pares de palavras e números do banco de dados
-def fetch_word_number_pairs():
-    try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor()
-
-        # Consulta para buscar todos os pares de palavras e números
-        query = '''
-            SELECT word, number, pdf_name
-            FROM word_number_pairs
-        '''
-        cursor.execute(query)
-        results = cursor.fetchall()
-
-        cursor.close()
-        connection.close()
-
-        return results
-    except mysql.connector.Error as err:
-        print(f"Erro: {err}")
-        return []
-
 # Rota principal da aplicação (exibe a página inicial e lida com uploads e buscas)
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -236,7 +239,7 @@ def index():
     selected_start_date = None
     selected_end_date = None
     pdf_list = []
-    word_number_pairs = []
+    service_table = []
 
     # Obtém a lista de arquivos PDF enviados que estão no banco de dados
     try:
@@ -304,15 +307,15 @@ def index():
             if not results:
                 flash('Nenhum relatório encontrado para o intervalo de datas selecionado.', 'info')
 
-    # Busca os pares de palavras e números para exibição
-    word_number_pairs = fetch_word_number_pairs()
+    # Busca a tabela de serviços para exibição
+    service_table = fetch_service_table()
 
     return render_template('index.html', 
                            results=results, 
                            selected_start_date=selected_start_date, 
                            selected_end_date=selected_end_date, 
                            pdf_list=pdf_list,
-                           word_number_pairs=word_number_pairs)             
+                           service_table=service_table)
 
 # Inicia a aplicação Flask
 if __name__ == '__main__':

@@ -56,29 +56,33 @@
         {% endif %}
     {% endwith %}
 
-    <!-- Display word-number pairs -->
-    <h2>Word-Number Pairs Extracted</h2>
-    {% if word_number_pairs %}
+    <!-- Display service table -->
+    <h2>Service Table Extracted</h2>
+    {% if service_table %}
         <table border="1">
             <thead>
                 <tr>
-                    <th>Word</th>
-                    <th>Number</th>
+                    <th>Item</th>
+                    <th>Service</th>
+                    <th>Unit</th>
+                    <th>Quantity</th>
                     <th>PDF Name</th>
                 </tr>
             </thead>
             <tbody>
-                {% for pair in word_number_pairs %}
+                {% for row in service_table %}
                     <tr>
-                        <td>{{ pair[0] }}</td>
-                        <td>{{ pair[1] }}</td>
-                        <td>{{ pair[2] }}</td>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
-        <p>No word-number pairs have been extracted yet.</p>
+        <p>No service table data has been extracted yet.</p>
     {% endif %}
 </body>
 </html>
