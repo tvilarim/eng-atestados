@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.9" # Depurando extração de tabela
+        version: "v0.1.10" # Ajustes de regex
     spec:
       containers:
       - name: flask-report
