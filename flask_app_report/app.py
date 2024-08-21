@@ -119,6 +119,9 @@ def extract_and_save_service_table(text, pdf_name):
             table_pattern = r'(\d{2}\s\d{2}\s\d{2})\s+([^\d\s]+(?:\s+[^\d\s]+)*)\s+([A-Za-z]+)\s+([\d,.]+)'
             matches = re.findall(table_pattern, service_section)
 
+            if matches:
+                print(f"Matches encontrados: {matches}")  # Debug para verificar os dados extraídos
+
             # Insere os dados extraídos na tabela service_table
             for match in matches:
                 item = match[0]
@@ -319,6 +322,9 @@ def index():
 
     # Busca a tabela de serviços para exibição
     service_table = fetch_service_table()
+
+    if not service_table:
+        flash('Nenhum dado de tabela de serviços foi extraído.', 'info')
 
     return render_template('index.html', 
                            results=results, 
