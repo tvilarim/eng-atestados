@@ -107,26 +107,34 @@ def extract_and_save_service_table(text, pdf_name):
             )
         ''')
 
+        # Normaliza o texto para capturar variações de "Serviços"
+        normalized_text = unidecode.unidecode(text.lower())
+
         # Expressão regular para localizar a palavra "Serviços" em todas as suas variantes
-        service_start_pattern = r'\b[Ss][eéêÈÉÊèèê][rvRV][iíìîÌÍÎììî][çc][oOÓÒÔõòóôõsS]\b'
-        service_section = re.split(service_start_pattern, text)[-1]
+        service_start_pattern = r'\bservicos?\b'
+        service_section_match = re.search(service_start_pattern, normalized_text)
 
-        # Expressão regular para capturar linhas de tabela com "Item", "Serviços", "Unid" e "QTDE"
-        table_pattern = r'(\d+\s*\d*\s*\d*)\s+([^\d\s]+(?:\s+[^\d\s]+)*)\s+([A-Za-z]+)\s+([\d,.]+)'
-        matches = re.findall(table_pattern, service_section)
+        if service_section_match:
+            service_section = normalized_text[service_section_match.end():]
 
-        # Insere os dados extraídos na tabela service_table
-        for match in matches:
-            item = match[0]
-            service = match[1]
-            unit = match[2]
-            quantity = match[3]
-            cursor.execute('''
-                INSERT INTO service_table (item, service, unit, quantity, pdf_name) 
-                VALUES (%s, %s, %s, %s, %s)
-            ''', (item, service, unit, quantity, pdf_name))
-        
-        connection.commit()  # Confirma a transação
+            # Expressão regular para capturar linhas de tabela com "Item", "Serviço", "Unidade", "Quantidade"
+            table_pattern = r'(\d+\s*\d*\s*\d*)\s+([^\d\s]+(?:\s+[^\d\s]+)*)\s+([A-Za-z]+)\s+([\d,.]+)'
+            matches = re.findall(table_pattern, service_section)
+
+            # Insere os dados extraídos na tabela service_table
+            for match in matches:
+                item = match[0]
+                service = match[1]
+                unit = match[2]
+                quantity = match[3]
+                cursor.execute('''
+                    INSERT INTO service_table (item, service, unit, quantity, pdf_name) 
+                    VALUES (%s, %s, %s, %s, %s)
+                ''', (item, service, unit, quantity, pdf_name))
+            
+            connection.commit()  # Confirma a transação
+        else:
+            print("A palavra 'Serviços' não foi encontrada no texto.")
     except mysql.connector.Error as err:
         print(f"Erro: {err}")
     finally:
@@ -322,5 +330,5 @@ def index():
                            service_table=service_table)
 
 # Inicia a aplicação Flask
-if __name__ == '__main__':
+if __name == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
