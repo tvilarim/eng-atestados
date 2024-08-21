@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.3" # Testes para gerar tabela de serviços e mover index de volta para templates :D
+        version: "v0.1.4" # Mais testes para gerar tabela de serviços
     spec:
       containers:
       - name: flask-report

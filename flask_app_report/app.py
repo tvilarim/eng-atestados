@@ -107,9 +107,13 @@ def extract_and_save_service_table(text, pdf_name):
             )
         ''')
 
+        # Expressão regular para localizar a palavra "Serviços" em todas as suas variantes
+        service_start_pattern = r'\b[Ss][eéêÈÉÊèèê][rvRV][iíìîÌÍÎììî][çc][oOÓÒÔõòóôõsS]\b'
+        service_section = re.split(service_start_pattern, text)[-1]
+
         # Expressão regular para capturar linhas de tabela com "Item", "Serviços", "Unid" e "QTDE"
-        pattern = r'(\d+\s*\d*\s*\d*)\s+([^\d\s]+(?:\s+[^\d\s]+)*)\s+([A-Za-z]+)\s+([\d,.]+)'
-        matches = re.findall(pattern, text)
+        table_pattern = r'(\d+\s*\d*\s*\d*)\s+([^\d\s]+(?:\s+[^\d\s]+)*)\s+([A-Za-z]+)\s+([\d,.]+)'
+        matches = re.findall(table_pattern, service_section)
 
         # Insere os dados extraídos na tabela service_table
         for match in matches:
