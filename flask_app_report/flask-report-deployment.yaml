@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.8" # Novos testes para gerar tabela de serviços
+        version: "v0.1.9" # Depurando extração de tabela
     spec:
       containers:
       - name: flask-report
