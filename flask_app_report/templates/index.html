@@ -55,5 +55,30 @@
             </ul>
         {% endif %}
     {% endwith %}
+
+    <!-- Display word-number pairs -->
+    <h2>Word-Number Pairs Extracted</h2>
+    {% if word_number_pairs %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Word</th>
+                    <th>Number</th>
+                    <th>PDF Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pair in word_number_pairs %}
+                    <tr>
+                        <td>{{ pair[0] }}</td>
+                        <td>{{ pair[1] }}</td>
+                        <td>{{ pair[2] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No word-number pairs have been extracted yet.</p>
+    {% endif %}
 </body>
 </html>

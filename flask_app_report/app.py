@@ -89,6 +89,42 @@ def extract_dates(text):
 def calculate_hash(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
+# Função para extrair palavras com números à direita e salvar no banco de dados
+def extract_and_save_words_with_numbers(text, pdf_name):
+    try:
+        connection = mysql.connector.connect(**db_config)  # Conecta ao banco de dados
+        cursor = connection.cursor()
+
+        # Criação da tabela se não existir
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS word_number_pairs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                word VARCHAR(255),
+                number VARCHAR(50),
+                pdf_name VARCHAR(255)
+            )
+        ''')
+
+        # Expressão regular para capturar palavras seguidas de números (com ou sem símbolos entre eles)
+        pattern = r'\b(\w+)[\s]*[=:\-]?\s*(\d+(\.\d+)?)\b'
+        matches = re.findall(pattern, text)
+
+        # Insere os dados extraídos na tabela word_number_pairs
+        for match in matches:
+            word = match[0]
+            number = match[1]
+            cursor.execute('''
+                INSERT INTO word_number_pairs (word, number, pdf_name) 
+                VALUES (%s, %s, %s)
+            ''', (word, number, pdf_name))
+        
+        connection.commit()  # Confirma a transação
+    except mysql.connector.Error as err:
+        print(f"Erro: {err}")
+    finally:
+        cursor.close()  # Fecha o cursor
+        connection.close()  # Fecha a conexão com o banco de dados
+
 # Função para salvar os dados extraídos no banco de dados MySQL
 def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
     try:
@@ -132,6 +168,10 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
         ''', (pdf_name,))
         
         connection.commit()  # Confirma a transação
+
+        # Extrai e salva as palavras com números associadas
+        extract_and_save_words_with_numbers(text, pdf_name)
+
         return True
     except mysql.connector.Error as err:
         print(f"Erro: {err}")
@@ -166,6 +206,28 @@ def search_reports(start_date, end_date):
         print(f"Erro: {err}")
         return []
 
+# Função para buscar os pares de palavras e números do banco de dados
+def fetch_word_number_pairs():
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        # Consulta para buscar todos os pares de palavras e números
+        query = '''
+            SELECT word, number, pdf_name
+            FROM word_number_pairs
+        '''
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        return results
+    except mysql.connector.Error as err:
+        print(f"Erro: {err}")
+        return []
+
 # Rota principal da aplicação (exibe a página inicial e lida com uploads e buscas)
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -173,6 +235,7 @@ def index():
     selected_start_date = None
     selected_end_date = None
     pdf_list = []
+    word_number_pairs = []
 
     # Obtém a lista de arquivos PDF enviados que estão no banco de dados
     try:
@@ -240,7 +303,15 @@ def index():
             if not results:
                 flash('Nenhum relatório encontrado para o intervalo de datas selecionado.', 'info')
 
-    return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date, pdf_list=pdf_list)
+    # Busca os pares de palavras e números para exibição
+    word_number_pairs = fetch_word_number_pairs()
+
+    return render_template('index.html', 
+                           results=results, 
+                           selected_start_date=selected_start_date, 
+                           selected_end_date=selected_end_date, 
+                           pdf_list=pdf_list,
+                           word_number_pairs=word_number_pairs)             
 
 # Inicia a aplicação Flask
 if __name__ == '__main__':
