@@ -89,7 +89,7 @@ def extract_dates(text):
 def calculate_hash(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
-# Função para extrair palavras com números à direita e salvar no banco de dados
+# Função para extrair palavras com números à direita, que comecem com Serviços e salvar no banco de dados
 def extract_and_save_words_with_numbers(text, pdf_name):
     try:
         connection = mysql.connector.connect(**db_config)  # Conecta ao banco de dados
@@ -105,9 +105,10 @@ def extract_and_save_words_with_numbers(text, pdf_name):
             )
         ''')
 
-        # Expressão regular para capturar palavras seguidas de números (com ou sem símbolos entre eles)
-        pattern = r'\b(\w+)[\s]*[=:\-]?\s*(\d+(\.\d+)?)\b'
-        matches = re.findall(pattern, text)
+        # Expressão regular para capturar a palavra "Serviços" seguida de palavras e números
+        # Considera variações como "Serviço", "serviços", etc.
+        pattern = r'\b[Ss]ervi[cç]os?\b.*?\b(\w+)[\s]*[=:\-]?\s*(\d+(\.\d+)?)\b'
+        matches = re.findall(pattern, text, re.DOTALL)
 
         # Insere os dados extraídos na tabela word_number_pairs
         for match in matches:
@@ -169,7 +170,7 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
         
         connection.commit()  # Confirma a transação
 
-        # Extrai e salva as palavras com números associadas
+        # Extrai e salva as palavras com números associadas começando com "Serviços"
         extract_and_save_words_with_numbers(text, pdf_name)
 
         return True
