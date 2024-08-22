@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.11" # Adicionando o ArgoCD ao kubertenes do projeto
+        version: "v0.1.12" # pull para o main
     spec:
       containers:
       - name: flask-report
