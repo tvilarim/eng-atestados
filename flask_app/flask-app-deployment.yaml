@@ -12,7 +12,7 @@ spec:
     metadata:
       labels:
         app: flask-app
-        version: "v2.4.14" # MySQL Secret
+        version: "v2.5.0" # OK OK OK Busca OK OK OK
     spec:
       containers:
       - name: flask-app
