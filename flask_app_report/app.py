@@ -2,7 +2,7 @@ import os
 import re
 import unidecode
 from datetime import datetime
-from flask import Flask, request, redirect, url_for, flash
+from flask import Flask, request, redirect, url_for, flash, render_template
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
