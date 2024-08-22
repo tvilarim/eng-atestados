@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v0.1.16" # Correção de erros
+        version: "v3.0.0" # !!!!! OK OK OK HARD RESET OK OK OK
     spec:
       containers:
       - name: flask-report
