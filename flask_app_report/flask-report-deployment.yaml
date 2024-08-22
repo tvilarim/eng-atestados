@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v1.0.7" # Apagando scripts bash
+        version: "v0.1.12" # pull para o main
     spec:
       containers:
       - name: flask-report

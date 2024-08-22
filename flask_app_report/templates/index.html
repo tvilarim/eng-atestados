@@ -55,5 +55,34 @@
             </ul>
         {% endif %}
     {% endwith %}
+
+    <!-- Display service table -->
+    <h2>Service Table Extracted</h2>
+    {% if service_table %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Service</th>
+                    <th>Unit</th>
+                    <th>Quantity</th>
+                    <th>PDF Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in service_table %}
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No service table data has been extracted yet.</p>
+    {% endif %}
 </body>
 </html>
