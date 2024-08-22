@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'  # Diretório onde os arquivos serão armazenados
 app.config['ALLOWED_EXTENSIONS'] = {'pdf'}  # Extensões permitidas para upload
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'sua_chave_secreta_aqui')  # Chave secreta da aplicação Flask
 
 # Função para verificar se o arquivo tem uma extensão permitida
 def allowed_file(filename):
