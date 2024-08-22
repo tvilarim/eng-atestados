@@ -6,35 +6,37 @@ from flask import Flask, request, redirect, url_for, flash, render_template
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
+app.config['UPLOAD_FOLDER'] = 'uploads'  # Diretório onde os arquivos serão armazenados
+app.config['ALLOWED_EXTENSIONS'] = {'pdf'}  # Extensões permitidas para upload
 
+# Função para verificar se o arquivo tem uma extensão permitida
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+# Função para processar um arquivo PDF e extrair o texto
 def process_pdf(file_path):
-    # Process the PDF and extract the text
-    # This function is not implemented, as it depends on the specific PDF processing library being used
+    # Esta função é um placeholder e deve ser implementada conforme a biblioteca de processamento de PDFs utilizada
     pass
 
+# Função para calcular o hash do texto extraído
 def calculate_hash(extracted_text):
-    # Calculate the hash of the extracted text
-    # This function is not implemented, as it depends on the specific hashing algorithm being used
+    # Esta função é um placeholder e deve ser implementada conforme o algoritmo de hash utilizado
     pass
 
+# Função para extrair as datas do texto extraído
 def extract_dates(extracted_text):
-    # Extract the dates from the extracted text
-    # This function is not implemented, as it depends on the specific date extraction algorithm being used
-    pass
+    # Esta função é um placeholder e deve ser implementada conforme o algoritmo de extração de datas utilizado
+    # Retornando uma tupla de None para evitar o erro de desempacotamento
+    return None, None
 
+# Função para salvar os dados extraídos no banco de dados MySQL
 def save_to_mysql(extracted_text, text_hash, start_date, end_date, filename):
-    # Save the extracted text, text hash, start date, end date, and filename to the MySQL database
-    # This function is not implemented, as it depends on the specific MySQL database schema and connection being used
+    # Esta função é um placeholder e deve ser implementada conforme o esquema e a conexão com o banco de dados MySQL
     pass
 
+# Função para buscar relatórios dentro de um intervalo de datas
 def search_reports(start_date, end_date):
-    # Search for reports within the specified date range
-    # This function is not implemented, as it depends on the specific report searching algorithm being used
+    # Esta função é um placeholder e deve ser implementada conforme o algoritmo de busca de relatórios utilizado
     pass
 
 @app.route('/', methods=['GET', 'POST'])
@@ -46,22 +48,25 @@ def index():
                 if file.filename == '':
                     continue
                 if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
+                    filename = secure_filename(file.filename)  # Garante que o nome do arquivo é seguro
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)
+                    file.save(file_path)  # Salva o arquivo no diretório de uploads
 
-                    extracted_text = process_pdf(file_path)
-                    text_hash = calculate_hash(extracted_text)
-                    start_date, end_date = extract_dates(extracted_text)
+                    extracted_text = process_pdf(file_path)  # Processa o PDF e extrai o texto
+                    text_hash = calculate_hash(extracted_text)  # Calcula o hash do texto extraído
+                    start_date, end_date = extract_dates(extracted_text)  # Extrai as datas do texto
 
+                    # Verifica se as datas foram extraídas
                     if not start_date and not end_date:
                         flash(f'Não foi possível extrair datas do PDF: {filename}. Salvando sem datas.', 'warning')
                     else:
+                        # Salva os dados extraídos no banco de dados
                         if save_to_mysql(extracted_text, text_hash, start_date, end_date, filename):
                             flash(f'Arquivo {filename} enviado e processado com sucesso', 'success')
                         else:
                             flash(f'Este arquivo {filename} já está no banco de dados. Pode seguir com o relatório', 'error')
 
+        # Verifica se as datas de início e fim foram fornecidas para busca de relatórios
         elif 'start_date' in request.form and 'end_date' in request.form:
             selected_start_date_str = request.form.get('start_date')
             selected_end_date_str = request.form.get('end_date')
@@ -71,22 +76,25 @@ def index():
                 return redirect(url_for('index'))
 
             try:
+                # Converte as strings de data para objetos datetime
                 selected_start_date = datetime.strptime(selected_start_date_str, '%Y-%m-%d')
                 selected_end_date = datetime.strptime(selected_end_date_str, '%Y-%m-%d')
             except ValueError:
                 flash('Formato de data inválido. Use o calendário para selecionar a data.', 'error')
                 return redirect(url_for('index'))
 
+            # Verifica se a data final é posterior à data inicial
             if selected_end_date < selected_start_date:
                 flash('A data final deve ser após a data inicial.', 'error')
                 return redirect(url_for('index'))
 
+            # Busca relatórios no intervalo de datas especificado
             results = search_reports(selected_start_date, selected_end_date)
-            # Render the results template with the search results
-            # This is not implemented, as it depends on the specific template being used
+            # Renderiza os resultados da busca na template (não implementado)
+            # Aqui você deve retornar os resultados na renderização do template correspondente
             pass
 
-    return render_template('index.html')
+    return render_template('index.html')  # Renderiza a página principal
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)  # Inicia a aplicação Flask
