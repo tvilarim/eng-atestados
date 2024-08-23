@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: flask-report
-        version: "v3.0.1" # !!!!! TRADUZIDO PARA PT-BR
+        version: "v3.0.2" # !!!!! Ajuste no título da lista dos já inseridos na base
     spec:
       containers:
       - name: flask-report
