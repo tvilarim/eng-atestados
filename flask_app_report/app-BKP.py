@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import mysql.connector
 from pdf2image import convert_from_path
 import pytesseract
+from pytesseract import Output
 import hashlib
 from datetime import datetime
 import unidecode
@@ -35,14 +36,15 @@ def process_pdf(pdf_path):
     images = convert_from_path(pdf_path)  # Converte as páginas do PDF em imagens
     extracted_text = []
     for image in images:
-        text = pytesseract.image_to_string(image)  # Extrai o texto de cada imagem usando OCR
-        extracted_text.append(text)  # Adiciona o texto extraído a uma lista
+        text = pytesseract.image_to_string(image, output_type=pytesseract.Output.DICT)  # Extrai o texto de cada imagem usando OCR
+        extracted_text.append(text['text'])  # Adiciona o texto extraído a uma lista
     combined_text = ' '.join(extracted_text)  # Combina todo o texto extraído em uma única string
     return combined_text
 
 # Função para extrair datas específicas do texto
 def extract_dates(text):
-    normalized_text = unidecode.unidecode(text)  # Normaliza o texto para remover acentos
+    # Normaliza o texto para remover acentos
+    normalized_text = unidecode.unidecode(text)
 
     # Padrões para corresponder "Data de início:" e "Conclusão Efetiva:"
     patterns = [
@@ -87,61 +89,6 @@ def extract_dates(text):
 def calculate_hash(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
-# Função para extrair e salvar os dados da tabela de serviços
-def extract_and_save_service_table(text, pdf_name):
-    try:
-        connection = mysql.connector.connect(**db_config)  # Conecta ao banco de dados
-        cursor = connection.cursor()
-
-        # Criação da tabela se não existir
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS service_table (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                item VARCHAR(50),
-                service VARCHAR(255),
-                unit VARCHAR(50),
-                quantity VARCHAR(50),
-                pdf_name VARCHAR(255)
-            )
-        ''')
-
-        # Normaliza o texto para capturar variações de "Serviços"
-        normalized_text = unidecode.unidecode(text.lower())
-
-        # Expressão regular para localizar a palavra "Serviços" em todas as suas variantes
-        service_start_pattern = r'\bservicos?\b'
-        service_section_match = re.search(service_start_pattern, normalized_text)
-
-        if service_section_match:
-            service_section = normalized_text[service_section_match.end():]
-
-            # Expressão regular para capturar linhas de tabela com "Item", "Serviço", "Unidade", "Quantidade"
-            table_pattern = r'(\d{2}\s\d{2}\s\d{2})\s+([^\d\s]+(?:\s+[^\d\s]+)*)\s+([A-Za-z]+)\s+([\d,.]+)'
-            matches = re.findall(table_pattern, service_section)
-
-            if matches:
-                print(f"Matches encontrados: {matches}")  # Debug para verificar os dados extraídos
-
-            # Insere os dados extraídos na tabela service_table
-            for match in matches:
-                item = match[0]
-                service = match[1]
-                unit = match[2]
-                quantity = match[3]
-                cursor.execute('''
-                    INSERT INTO service_table (item, service, unit, quantity, pdf_name) 
-                    VALUES (%s, %s, %s, %s, %s)
-                ''', (item, service, unit, quantity, pdf_name))
-            
-            connection.commit()  # Confirma a transação
-        else:
-            print("A palavra 'Serviços' não foi encontrada no texto.")
-    except mysql.connector.Error as err:
-        print(f"Erro: {err}")
-    finally:
-        cursor.close()  # Fecha o cursor
-        connection.close()  # Fecha a conexão com o banco de dados
-
 # Função para salvar os dados extraídos no banco de dados MySQL
 def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
     try:
@@ -185,10 +132,6 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
         ''', (pdf_name,))
         
         connection.commit()  # Confirma a transação
-
-        # Extrai e salva a tabela de serviços
-        extract_and_save_service_table(text, pdf_name)
-
         return True
     except mysql.connector.Error as err:
         print(f"Erro: {err}")
@@ -196,28 +139,6 @@ def save_to_mysql(text, text_hash, start_date, end_date, pdf_name):
     finally:
         cursor.close()  # Fecha o cursor
         connection.close()  # Fecha a conexão com o banco de dados
-
-# Função para buscar a tabela de serviços no banco de dados
-def fetch_service_table():
-    try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor()
-
-        # Consulta para buscar todos os registros da tabela de serviços
-        query = '''
-            SELECT item, service, unit, quantity, pdf_name
-            FROM service_table
-        '''
-        cursor.execute(query)
-        results = cursor.fetchall()
-
-        cursor.close()
-        connection.close()
-
-        return results
-    except mysql.connector.Error as err:
-        print(f"Erro: {err}")
-        return []
 
 # Função para buscar relatórios no banco de dados com base em um intervalo de datas
 def search_reports(start_date, end_date):
@@ -252,7 +173,6 @@ def index():
     selected_start_date = None
     selected_end_date = None
     pdf_list = []
-    service_table = []
 
     # Obtém a lista de arquivos PDF enviados que estão no banco de dados
     try:
@@ -320,18 +240,7 @@ def index():
             if not results:
                 flash('Nenhum relatório encontrado para o intervalo de datas selecionado.', 'info')
 
-    # Busca a tabela de serviços para exibição
-    service_table = fetch_service_table()
-
-    if not service_table:
-        flash('Nenhum dado de tabela de serviços foi extraído.', 'info')
-
-    return render_template('index.html', 
-                           results=results, 
-                           selected_start_date=selected_start_date, 
-                           selected_end_date=selected_end_date, 
-                           pdf_list=pdf_list,
-                           service_table=service_table)
+    return render_template('index.html', results=results, selected_start_date=selected_start_date, selected_end_date=selected_end_date, pdf_list=pdf_list)
 
 # Inicia a aplicação Flask
 if __name__ == '__main__':

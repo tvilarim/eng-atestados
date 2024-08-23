@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Upload and Search</title>
+    <title>ENG ATESTADOS</title>
 </head>
 <body>
-    <h1>Upload PDF and Search Reports</h1>
+    <h1>ENG ATESTADOS</h1>
 
-    <!-- Form for uploading PDFs -->
-    <h2>Upload PDFs</h2>
+    <!-- Formulário para carregar PDFs -->
+    <h2>Carregar PDFs</h2>
     <form method="POST" enctype="multipart/form-data">
         <input type="file" name="file" multiple>
-        <input type="submit" value="Upload">
+        <input type="submit" value="Enviar">
     </form>
 
-    <!-- Display list of uploaded files -->
-    <h2>All PDF files uploaded</h2>
+    <!-- Exibir lista de arquivos enviados -->
+    <h2>Todos os arquivos PDF enviados</h2>
     {% if pdf_list %}
         <ul>
             {% for file in pdf_list %}
@@ -24,21 +24,21 @@
             {% endfor %}
         </ul>
     {% else %}
-        <p>No PDF files have been uploaded yet.</p>
+        <p>Nenhum arquivo PDF foi enviado ainda.</p>
     {% endif %}
 
-    <!-- Form for searching reports -->
-    <h2>Search Reports</h2>
+    <!-- Formulário para buscar relatórios -->
+    <h2>Buscar Relatórios</h2>
     <form method="POST">
-        <label for="start_date">Start Date:</label>
+        <label for="start_date">Data de Início:</label>
         <input type="date" name="start_date" value="{{ selected_start_date|default('') }}">
-        <label for="end_date">End Date:</label>
+        <label for="end_date">Data de Término:</label>
         <input type="date" name="end_date" value="{{ selected_end_date|default('') }}">
-        <input type="submit" value="Search">
+        <input type="submit" value="Buscar">
     </form>
 
     {% if results %}
-        <h3>Search Results</h3>
+        <h3>Resultados da Busca</h3>
         <ul>
             {% for result in results %}
                 <li>{{ result.pdf_name }}: {{ result.text|truncate(100) }}...</li>
@@ -56,17 +56,17 @@
         {% endif %}
     {% endwith %}
 
-    <!-- Display service table -->
-    <h2>Service Table Extracted</h2>
+    <!-- Exibir tabela de serviços -->
+    <h2>Tabela de Serviços Extraída</h2>
     {% if service_table %}
         <table border="1">
             <thead>
                 <tr>
                     <th>Item</th>
-                    <th>Service</th>
-                    <th>Unit</th>
-                    <th>Quantity</th>
-                    <th>PDF Name</th>
+                    <th>Serviço</th>
+                    <th>Unidade</th>
+                    <th>Quantidade</th>
+                    <th>Nome do PDF</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,7 +82,7 @@
             </tbody>
         </table>
     {% else %}
-        <p>No service table data has been extracted yet.</p>
+        <p>Nenhum dado da tabela de serviços foi extraído ainda.</p>
     {% endif %}
 </body>
 </html>
